@@ -1,0 +1,15 @@
+[   13339ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5177/favicon.ico:0
+[  289410ms] [WARNING] [Vue warn]: Unhandled error during execution of native event handler 
+  at <Inspector key=2 > 
+  at <WorkspaceLayout key=1 onHome=fn > 
+  at <App> @ http://localhost:5177/node_modules/.vite/deps/chunk-HA5QGFDT.js?v=7519b6e4:2233
+[  289411ms] DataCloneError: Failed to execute 'structuredClone' on 'Window': #<Object> could not be cloned.
+    at deepClone (http://localhost:5177/src/fusion/serializer.ts:3:53)
+    at Proxy.pushHistory (http://localhost:5177/src/stores/fusionDocument.ts:62:17)
+    at Proxy.wrappedAction (http://localhost:5177/node_modules/.vite/deps/pinia.js?v=7519b6e4:4858:18)
+    at store.<computed> (http://localhost:5177/node_modules/.vite/deps/pinia.js?v=7519b6e4:4607:42)
+    at Proxy.openColorPicker (http://localhost:5177/src/components/Inspector.vue:696:14)
+    at $setup.activeTab.$setup.hasFill._createElementVNode.onClick._cache.<computed>._cache.<computed> (http://localhost:5177/src/components/Inspector.vue:1741:79)
+    at callWithErrorHandling (http://localhost:5177/node_modules/.vite/deps/chunk-HA5QGFDT.js?v=7519b6e4:2381:19)
+    at callWithAsyncErrorHandling (http://localhost:5177/node_modules/.vite/deps/chunk-HA5QGFDT.js?v=7519b6e4:2388:17)
+    at HTMLDivElement.invoker (http://localhost:5177/node_modules/.vite/deps/chunk-HA5QGFDT.js?v=7519b6e4:11681:7)

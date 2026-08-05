@@ -1,0 +1,4 @@
+packages:
+  - "."
+  - "原型设计"
+  - "shared"

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1260" width="1500" height="1260" role="img" aria-labelledby="title desc">
+  <title id="title">鸿蒙原生通用平面设计软件全系统完整架构图</title>
+  <desc id="desc">展示 HarmonyOS、OpenHarmony 与未来 Windows 客户端共用的设计软件完整架构，包含 Casdoor 统一用户中心、Go API、按产品作用域的钱包账本、Fusion DOM、本地引擎、开放格式、作业治理和会员授权。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#667085" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .title{font:500 24px sans-serif;fill:#17212b}.h{font:500 17px sans-serif;fill:#17212b}.b{font:400 14px sans-serif;fill:#344054}.s{font:400 12px sans-serif;fill:#667085}.line{fill:none;stroke:#667085;stroke-width:1.5;marker-end:url(#arrow)}.dash{fill:none;stroke:#98a2b3;stroke-width:1.2;stroke-dasharray:6 5;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1500" height="1260" fill="#ffffff"/>
+  <text x="50" y="48" class="title">Harmony Design Studio · 全系统完整架构</text>
+  <text x="50" y="75" class="s">ArkTS/ArkUI 原生客户端 · Go 模块化单体后端 · Casdoor 统一用户中心 · 产品/组织作用域账本 · Windows 演进</text>
+
+  <rect x="50" y="105" width="1400" height="125" rx="16" fill="#eaf3de" stroke="#3b6d11" stroke-width="1.5"/>
+  <text x="75" y="137" class="h">多入口层</text>
+  <rect x="75" y="154" width="225" height="52" rx="8" fill="#ffffff" stroke="#97c459"/>
+  <text x="187" y="177" text-anchor="middle" class="h">GUI 编辑器</text><text x="187" y="196" text-anchor="middle" class="s">ArkUI · 画布 · 面板 · 手势</text>
+  <rect x="325" y="154" width="225" height="52" rx="8" fill="#ffffff" stroke="#97c459"/>
+  <text x="437" y="177" text-anchor="middle" class="h">hds CLI</text><text x="437" y="196" text-anchor="middle" class="s">Shell · CI/CD · 批处理</text>
+  <rect x="575" y="154" width="225" height="52" rx="8" fill="#ffffff" stroke="#97c459"/>
+  <text x="687" y="177" text-anchor="middle" class="h">MCP Server / Client</text><text x="687" y="196" text-anchor="middle" class="s">外部 Agent · 外部资源</text>
+  <rect x="825" y="154" width="225" height="52" rx="8" fill="#ffffff" stroke="#97c459"/>
+  <text x="937" y="177" text-anchor="middle" class="h">Skill Runtime</text><text x="937" y="196" text-anchor="middle" class="s">工作流 · 规范 · 编排</text>
+  <rect x="1075" y="154" width="300" height="52" rx="8" fill="#ffffff" stroke="#97c459"/>
+  <text x="1225" y="177" text-anchor="middle" class="h">插件 / 扩展</text><text x="1225" y="196" text-anchor="middle" class="s">工具 · 面板 · 格式适配</text>
+
+  <path d="M750 230 L750 260" class="line"/>
+  <rect x="50" y="265" width="1400" height="105" rx="16" fill="#e6f1fb" stroke="#185fa5" stroke-width="1.5"/>
+  <text x="75" y="297" class="h">统一能力与 AI 协议层</text>
+  <rect x="75" y="313" width="280" height="38" rx="7" fill="#ffffff" stroke="#85b7eb"/><text x="215" y="337" text-anchor="middle" class="b">Command Registry</text>
+  <rect x="375" y="313" width="280" height="38" rx="7" fill="#ffffff" stroke="#85b7eb"/><text x="515" y="337" text-anchor="middle" class="b">ProtocolDriver + ModelRouter</text>
+  <rect x="675" y="313" width="280" height="38" rx="7" fill="#ffffff" stroke="#85b7eb"/><text x="815" y="337" text-anchor="middle" class="b">Capability Registry + BYOK</text>
+  <rect x="975" y="313" width="400" height="38" rx="7" fill="#ffffff" stroke="#85b7eb"/><text x="1175" y="337" text-anchor="middle" class="b">Tools · Resources · Prompts · Tasks</text>
+
+  <path d="M750 370 L750 400" class="line"/>
+  <rect x="50" y="405" width="1400" height="130" rx="16" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1.5"/>
+  <text x="75" y="437" class="h">核心业务与文档模型层</text>
+  <rect x="75" y="453" width="360" height="58" rx="8" fill="#ffffff" stroke="#5dcaa5"/><text x="255" y="477" text-anchor="middle" class="h">Fusion DOM</text><text x="255" y="497" text-anchor="middle" class="s">页面 · 图层 · 矢量 · 位图 · 文本流</text>
+  <rect x="455" y="453" width="260" height="58" rx="8" fill="#ffffff" stroke="#5dcaa5"/><text x="585" y="477" text-anchor="middle" class="h">Command / Transaction</text><text x="585" y="497" text-anchor="middle" class="s">撤销 · 重做 · 原子提交</text>
+  <rect x="735" y="453" width="260" height="58" rx="8" fill="#ffffff" stroke="#5dcaa5"/><text x="865" y="477" text-anchor="middle" class="h">History / Version</text><text x="865" y="497" text-anchor="middle" class="s">快照 · 分支 · 恢复</text>
+  <rect x="1015" y="453" width="360" height="58" rx="8" fill="#ffffff" stroke="#5dcaa5"/><text x="1195" y="477" text-anchor="middle" class="h">Assets / Styles / AI Context</text><text x="1195" y="497" text-anchor="middle" class="s">资源引用 · 样式 · 可复现参数</text>
+
+  <path d="M750 535 L750 565" class="line"/>
+  <rect x="50" y="570" width="1400" height="125" rx="16" fill="#f1efe8" stroke="#5f5e5a" stroke-width="1.5"/>
+  <text x="75" y="602" class="h">本地渲染、排版与导出引擎层</text>
+  <rect x="75" y="618" width="245" height="52" rx="8" fill="#ffffff" stroke="#b4b2a9"/><text x="197" y="641" text-anchor="middle" class="h">Skia</text><text x="197" y="660" text-anchor="middle" class="s">矢量 · 位图 · 合成 · GPU</text>
+  <rect x="340" y="618" width="245" height="52" rx="8" fill="#ffffff" stroke="#b4b2a9"/><text x="462" y="641" text-anchor="middle" class="h">文字排版</text><text x="462" y="660" text-anchor="middle" class="s">FreeType · HarfBuzz · ICU</text>
+  <rect x="605" y="618" width="245" height="52" rx="8" fill="#ffffff" stroke="#b4b2a9"/><text x="727" y="641" text-anchor="middle" class="h">色彩与图像</text><text x="727" y="660" text-anchor="middle" class="s">lcms2 · OpenCV · 滤镜</text>
+  <rect x="870" y="618" width="245" height="52" rx="8" fill="#ffffff" stroke="#b4b2a9"/><text x="992" y="641" text-anchor="middle" class="h">出版输出</text><text x="992" y="660" text-anchor="middle" class="s">PDFium · libHaru · EPS</text>
+  <rect x="1135" y="618" width="240" height="52" rx="8" fill="#ffffff" stroke="#b4b2a9"/><text x="1255" y="641" text-anchor="middle" class="h">NAPI / C ABI</text><text x="1255" y="660" text-anchor="middle" class="s">鸿蒙桥接 · Windows 共享</text>
+
+  <path d="M750 695 L750 725" class="line"/>
+  <rect x="50" y="730" width="1400" height="105" rx="16" fill="#fbeaf0" stroke="#993556" stroke-width="1.5"/>
+  <text x="75" y="762" class="h">数据、格式与资产层</text>
+  <rect x="75" y="778" width="300" height="38" rx="7" fill="#ffffff" stroke="#ed93b1"/><text x="225" y="802" text-anchor="middle" class="b">.hds · Fusion DOM 全量工程态</text>
+  <rect x="395" y="778" width="280" height="38" rx="7" fill="#ffffff" stroke="#ed93b1"/><text x="535" y="802" text-anchor="middle" class="b">SVG · ODG · EPS · OpenRaster</text>
+  <rect x="695" y="778" width="280" height="38" rx="7" fill="#ffffff" stroke="#ed93b1"/><text x="835" y="802" text-anchor="middle" class="b">PDF/X-4 · PNG · TIFF · PSD</text>
+  <rect x="995" y="778" width="380" height="38" rx="7" fill="#ffffff" stroke="#ed93b1"/><text x="1185" y="802" text-anchor="middle" class="b">字体 · 色板 · 模板 · 画笔 · 缓存</text>
+
+  <rect x="50" y="870" width="1400" height="135" rx="16" fill="#eaf3de" stroke="#3b6d11" stroke-width="1.5"/>
+  <text x="75" y="902" class="h">业务后端与统一认证层</text>
+  <rect x="75" y="918" width="245" height="60" rx="8" fill="#ffffff" stroke="#97c459"/><text x="197" y="942" text-anchor="middle" class="h">Casdoor 用户中心</text><text x="197" y="961" text-anchor="middle" class="s">用户 · 组织 · 权限 · OIDC · 订阅</text>
+  <rect x="340" y="918" width="300" height="60" rx="8" fill="#ffffff" stroke="#97c459"/><text x="490" y="942" text-anchor="middle" class="h">Go API / Worker</text><text x="490" y="961" text-anchor="middle" class="s">net/http · chi · 项目 API · Job</text>
+  <rect x="660" y="918" width="220" height="60" rx="8" fill="#ffffff" stroke="#97c459"/><text x="770" y="942" text-anchor="middle" class="h">钱包 / 积分账本</text><text x="770" y="961" text-anchor="middle" class="s">product_id · scope · unit · 流水</text>
+  <rect x="900" y="918" width="190" height="60" rx="8" fill="#ffffff" stroke="#97c459"/><text x="995" y="942" text-anchor="middle" class="h">PostgreSQL</text><text x="995" y="961" text-anchor="middle" class="s">账户 · 文档 · 账本事实数据</text>
+  <rect x="1110" y="918" width="265" height="60" rx="8" fill="#ffffff" stroke="#97c459"/><text x="1242" y="942" text-anchor="middle" class="h">Redis · NATS · S3</text><text x="1242" y="961" text-anchor="middle" class="s">缓存 · Job · 大资源/产物</text>
+
+  <path d="M197 870 L197 835" class="dash"/>
+  <path d="M490 870 L490 835" class="dash"/>
+  <path d="M770 870 L770 835" class="dash"/>
+  <path d="M995 870 L995 835" class="dash"/>
+  <path d="M1242 870 L1242 835" class="dash"/>
+  <text x="80" y="997" class="s">Casdoor 统一用户/组织/权限/全局账户；项目钱包按 product_id · scope · unit 隔离并由账本审计</text>
+
+  <rect x="50" y="1025" width="675" height="105" rx="16" fill="#faeeda" stroke="#854f0b" stroke-width="1.5"/>
+  <text x="75" y="1057" class="h">横向治理平面</text>
+  <text x="75" y="1084" class="b">Permission · Audit · Job Queue · Quota · Rate Limit</text><text x="75" y="1108" class="s">MCP 审批 · CLI 作业 · Skill 沙箱 · 插件签名 · 数据权限</text>
+  <rect x="775" y="1025" width="675" height="105" rx="16" fill="#fcebeb" stroke="#a32d2d" stroke-width="1.5"/>
+  <text x="800" y="1057" class="h">商业与组织平面</text>
+  <text x="800" y="1084" class="b">Account · Subscription · Entitlement · Organization · Device</text><text x="800" y="1108" class="s">Free · Pro · Studio · Team · Enterprise · BYOK / 代理 AI 额度</text>
+
+  <path d="M360 370 L360 1025" class="dash"/>
+  <path d="M1140 370 L1140 1025" class="dash"/>
+  <text x="365" y="1009" class="s">入口统一复用 Command / Job / Permission / Audit</text>
+  <text x="1145" y="1009" class="s">会员控制服务规模，不锁死 .hds 与开放格式</text>
+
+  <rect x="50" y="1155" width="1400" height="70" rx="16" fill="#e6f1fb" stroke="#185fa5" stroke-width="1.5"/>
+  <text x="75" y="1184" class="h">部署与运行环境</text>
+  <text x="75" y="1207" class="b">HarmonyOS 手机 / 平板 / PC　·　OpenHarmony 移动 / PC / 行业设备　·　未来 Windows 独立 UI + 共享 Fusion Core / C ABI</text>
+</svg>

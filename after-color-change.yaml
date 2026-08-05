@@ -1,0 +1,764 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e115]:
+    - generic [ref=e116]:
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - generic [ref=e119]: 
+          - generic [ref=e121]: Harmony Design
+        - generic [ref=e122]:
+          - generic [ref=e123] [cursor=pointer]: 文件
+          - generic [ref=e124] [cursor=pointer]: 编辑
+          - generic [ref=e125] [cursor=pointer]: 对象
+          - generic [ref=e126] [cursor=pointer]: 文字
+          - generic [ref=e127] [cursor=pointer]: 选择
+          - generic [ref=e128] [cursor=pointer]: 页面
+          - generic [ref=e129] [cursor=pointer]: 效果
+          - generic [ref=e130] [cursor=pointer]: 视图
+          - generic [ref=e131] [cursor=pointer]: 窗口
+          - generic [ref=e132] [cursor=pointer]: 帮助
+      - generic [ref=e133]:
+        - generic "切换暗色模式" [ref=e134] [cursor=pointer]: 
+        - generic [ref=e136] [cursor=pointer]: JC
+        - generic "最小化" [ref=e139] [cursor=pointer]: 
+        - generic "最大化" [ref=e140] [cursor=pointer]: 
+        - generic "关闭" [ref=e141] [cursor=pointer]: 
+    - generic [ref=e142]:
+      - generic [ref=e143]:
+        - generic [ref=e144]:
+          - generic "主页" [ref=e145] [cursor=pointer]: 
+          - generic [ref=e148] [cursor=pointer]:
+            - generic [ref=e149]: 
+            - generic [ref=e150]: 
+            - generic [ref=e151]: 编组
+          - generic [ref=e152] [cursor=pointer]:
+            - generic [ref=e153]: 
+            - generic [ref=e154]: 
+            - generic [ref=e155]: 排列
+          - generic [ref=e156] [cursor=pointer]:
+            - generic [ref=e157]: 
+            - generic [ref=e158]: 
+            - generic [ref=e159]: 对齐
+          - generic [ref=e160] [cursor=pointer]:
+            - generic [ref=e161]: 
+            - generic [ref=e162]: 
+            - generic [ref=e163]: 分布
+          - generic [ref=e164] [cursor=pointer]:
+            - generic [ref=e165]: 
+            - generic [ref=e166]: 
+            - generic [ref=e167]: 矢量
+          - generic [ref=e168] [cursor=pointer]:
+            - generic [ref=e169]: 
+            - generic [ref=e170]: 
+            - generic [ref=e171]: 图片
+          - generic [ref=e172] [cursor=pointer]:
+            - generic [ref=e173]: 
+            - generic [ref=e174]: 
+            - generic [ref=e175]: 色彩
+        - generic [ref=e176]:
+          - generic [ref=e177]:
+            - generic [ref=e178]: W
+            - generic [ref=e179]: "148"
+            - generic [ref=e180]: H
+            - generic [ref=e181]: "92"
+            - generic [ref=e182]: ∠
+            - generic [ref=e183]: 0°
+          - generic "收起全部" [ref=e184] [cursor=pointer]: 
+      - text:                                                                     =
+    - generic [ref=e186]:
+      - generic [ref=e187]:
+        - generic [ref=e188]:
+          - generic [ref=e189] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 选择/移动
+              - generic: 长按展开
+        - generic [ref=e192]:
+          - generic [ref=e193] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 套索
+              - generic: 长按展开
+        - generic [ref=e196]:
+          - generic [ref=e197] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 裁剪
+              - generic: 长按展开
+        - generic [ref=e200]:
+          - generic [ref=e201] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 画笔
+              - generic: 长按展开
+        - generic [ref=e204]:
+          - generic [ref=e205] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 橡皮擦
+              - generic: 长按展开
+        - generic [ref=e208]:
+          - generic [ref=e209] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 渐变
+              - generic: 长按展开
+        - generic [ref=e212]:
+          - generic [ref=e213] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 钢笔
+              - generic: 长按展开
+        - generic [ref=e216]:
+          - generic [ref=e217] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 文字
+              - generic: 长按展开
+        - generic [ref=e220]:
+          - generic [ref=e221] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 矩形
+              - generic: 长按展开
+        - generic [ref=e224]:
+          - generic [ref=e225] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 仿制图章
+              - generic: 长按展开
+        - generic [ref=e228]:
+          - generic [ref=e229] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 模糊
+              - generic: 长按展开
+        - generic [ref=e232]:
+          - generic [ref=e233] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 减淡
+              - generic: 长按展开
+        - generic [ref=e236]:
+          - generic [ref=e237] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 吸管
+              - generic: 长按展开
+        - generic [ref=e240]:
+          - generic [ref=e241] [cursor=pointer]: 
+          - generic:
+            - generic:
+              - generic: 抓手
+              - generic: 长按展开
+      - generic [ref=e244]:
+        - generic [ref=e245]:
+          - generic [ref=e246] [cursor=pointer]: 页面
+          - generic [ref=e249] [cursor=pointer]: 图层
+          - generic [ref=e251] [cursor=pointer]: 资源
+        - generic [ref=e253]:
+          - generic [ref=e254]:
+            - generic "新建页面 Ctrl+Shift+P" [ref=e255] [cursor=pointer]: +
+            - generic "复制页面" [ref=e256] [cursor=pointer]: 
+            - generic "上移页面" [ref=e258] [cursor=pointer]: 
+            - generic "下移页面" [ref=e259] [cursor=pointer]: 
+          - generic [ref=e260]: 1/6
+        - generic [ref=e261]:
+          - generic [ref=e262]: 
+          - generic [ref=e263]: 母版
+        - generic [ref=e264]: A-母版
+        - generic [ref=e267]:
+          - generic [ref=e268] [cursor=pointer]:
+            - generic [ref=e269]: "1"
+            - generic [ref=e274]:
+              - generic "封面" [ref=e275]
+              - generic [ref=e276]: 页面 1
+          - generic [ref=e277] [cursor=pointer]:
+            - generic [ref=e278]: "2"
+            - generic [ref=e280]:
+              - generic "目录" [ref=e281]
+              - generic [ref=e282]: 页面 2
+          - generic [ref=e283] [cursor=pointer]:
+            - generic [ref=e284]: "3"
+            - generic [ref=e286]:
+              - generic "内页" [ref=e287]
+              - generic [ref=e288]: 页面 3
+          - generic [ref=e289] [cursor=pointer]:
+            - generic [ref=e290]: "4"
+            - generic [ref=e292]:
+              - generic "封底" [ref=e293]
+              - generic [ref=e294]: 页面 4
+          - generic [ref=e295] [cursor=pointer]:
+            - generic [ref=e296]: "5"
+            - generic [ref=e298]:
+              - generic "附录" [ref=e299]
+              - generic [ref=e300]: 页面 5
+          - generic [ref=e301] [cursor=pointer]:
+            - generic [ref=e302]: "6"
+            - generic [ref=e304]:
+              - generic "备注" [ref=e305]
+              - generic [ref=e306]: 页面 6
+      - generic [ref=e307]:
+        - generic [ref=e312]:
+          - generic [ref=e314]: "0"
+          - generic [ref=e315]: "50"
+          - generic [ref=e316]: "100"
+          - generic [ref=e317]: "150"
+          - generic [ref=e318]: "200"
+          - generic [ref=e319]: "250"
+          - generic [ref=e320]: "300"
+          - generic [ref=e321]: "350"
+          - generic [ref=e322]: "400"
+          - generic [ref=e323]: "450"
+          - generic [ref=e324]: "500"
+        - generic [ref=e325]:
+          - generic [ref=e326]:
+            - generic [ref=e328]: "0"
+            - generic [ref=e329]: "50"
+            - generic [ref=e330]: "100"
+            - generic [ref=e331]: "150"
+            - generic [ref=e332]: "200"
+            - generic [ref=e333]: "250"
+            - generic [ref=e334]: "300"
+            - generic [ref=e335]: "350"
+            - generic [ref=e336]: "400"
+            - generic [ref=e337]: "450"
+            - generic [ref=e338]: "500"
+            - generic [ref=e339]: "550"
+            - generic [ref=e340]: "600"
+            - generic [ref=e341]: "650"
+            - generic [ref=e342]: "700"
+            - generic [ref=e343]: "750"
+            - generic [ref=e344]: "800"
+            - generic [ref=e345]: "850"
+            - generic [ref=e346]: "900"
+          - generic [ref=e347]: 第 1 页 · 封面
+      - generic [ref=e351]:
+        - generic [ref=e352]:
+          - generic [ref=e353]:
+            - generic [ref=e354]: 
+            - generic [ref=e355]: 历史记录
+          - generic [ref=e356]:
+            - generic "折叠" [ref=e357] [cursor=pointer]: 
+            - generic "历史记录选项" [ref=e358] [cursor=pointer]: 
+        - generic [ref=e359]:
+          - generic "新建快照" [ref=e360] [cursor=pointer]: 
+          - generic [ref=e361]: 1 步
+        - generic [ref=e362]:
+          - generic "撤销" [ref=e363] [cursor=pointer]: 
+          - generic "拖动回退" [ref=e364] [cursor=pointer]
+          - generic "重做" [ref=e365] [cursor=pointer]: 
+        - generic "2026/7/27 23:15:24" [ref=e900] [cursor=pointer]:
+          - generic [ref=e901]:
+            - generic [ref=e902]: 
+            - generic [ref=e904]: 
+            - generic [ref=e905]: 修改填充色
+        - generic [ref=e371]:
+          - generic [ref=e372]: 1 已撤销
+          - generic [ref=e373]: 0 可重做
+      - generic [ref=e374]:
+        - generic [ref=e375]:
+          - generic [ref=e376] [cursor=pointer]: 设计
+          - generic [ref=e377] [cursor=pointer]: 导出
+          - generic [ref=e378] [cursor=pointer]:
+            - generic [ref=e379]: 
+            - text: 设置
+          - generic [ref=e380] [cursor=pointer]:
+            - generic [ref=e381]: 
+            - text: AI智能
+          - generic "窗口设置" [ref=e382] [cursor=pointer]: 
+        - generic [ref=e383]:
+          - generic [ref=e385]: 图片占位
+          - generic [ref=e877]:
+            - generic [ref=e878]: 已选中
+            - generic "取消选中" [ref=e879] [cursor=pointer]: 
+        - generic [ref=e386]:
+          - generic [ref=e387] [cursor=pointer]:
+            - generic [ref=e388]: 变换
+            - generic [ref=e389]: 
+          - generic [ref=e390]:
+            - generic [ref=e391]:
+              - generic [ref=e392]:
+                - generic [ref=e393]: X
+                - spinbutton "X mm" [ref=e394]: "40"
+                - generic [ref=e395]: mm
+              - generic [ref=e396]:
+                - generic [ref=e397]: "Y"
+                - spinbutton "Y mm" [ref=e398]: "240"
+                - generic [ref=e399]: mm
+              - generic [ref=e400]:
+                - generic [ref=e401]: W
+                - spinbutton "W mm" [ref=e402]: "360"
+                - generic [ref=e403]: mm
+              - generic [ref=e404]:
+                - generic [ref=e405]: H
+                - spinbutton "H mm" [ref=e406]: "220"
+                - generic [ref=e407]: mm
+            - generic [ref=e408]:
+              - generic [ref=e409]:
+                - generic [ref=e410]: ∠
+                - spinbutton "∠ °" [ref=e411]: "0"
+                - generic [ref=e412]: °
+              - generic [ref=e413]:
+                - generic [ref=e414]: ⤧
+                - spinbutton "⤧ %" [ref=e415]: "100"
+                - generic [ref=e416]: "%"
+            - generic [ref=e417]:
+              - generic [ref=e418] [cursor=pointer]:
+                - generic [ref=e419]: 
+                - generic [ref=e421]: 约束比例
+              - generic [ref=e422]:
+                - generic "水平翻转" [ref=e880] [cursor=pointer]: 
+                - generic "垂直翻转" [ref=e881] [cursor=pointer]: 
+        - generic [ref=e427]:
+          - generic [ref=e428] [cursor=pointer]:
+            - generic [ref=e429]: 对齐与分布
+            - generic [ref=e430]: 
+          - generic [ref=e431]:
+            - generic [ref=e432]:
+              - generic "左对齐" [ref=e433] [cursor=pointer]: 
+              - generic "水平居中" [ref=e435] [cursor=pointer]: 
+              - generic "右对齐" [ref=e437] [cursor=pointer]: 
+              - generic "顶对齐" [ref=e439] [cursor=pointer]: 
+              - generic "垂直居中" [ref=e441] [cursor=pointer]: 
+              - generic "底对齐" [ref=e443] [cursor=pointer]: 
+            - generic [ref=e445]:
+              - generic "水平均匀分布" [ref=e446] [cursor=pointer]: 
+              - generic "垂直均匀分布" [ref=e448] [cursor=pointer]: 
+              - generic "水平间距" [ref=e450] [cursor=pointer]: 
+              - generic "垂直间距" [ref=e452] [cursor=pointer]
+        - generic [ref=e453]:
+          - generic [ref=e454] [cursor=pointer]:
+            - generic [ref=e455]: 外观
+            - generic [ref=e456]: 
+          - generic [ref=e457]:
+            - generic [ref=e882]:
+              - generic [ref=e883] [cursor=pointer]: 填充
+              - generic [ref=e886] [cursor=pointer]: "#3AC487"
+            - generic [ref=e887]:
+              - generic [ref=e888]:
+                - generic [ref=e889] [cursor=pointer]: 描边
+                - generic [ref=e892]:
+                  - spinbutton [ref=e893]: "1"
+                  - generic [ref=e894]: px
+              - generic [ref=e895]:
+                - generic [ref=e896] [cursor=pointer]: 外部
+                - generic [ref=e897] [cursor=pointer]: 居中
+                - generic [ref=e898] [cursor=pointer]: 内部
+            - generic [ref=e458]:
+              - generic [ref=e459]: 不透明度
+              - generic [ref=e460]:
+                - slider [ref=e461] [cursor=pointer]: "100"
+                - spinbutton [ref=e462]: "100"
+                - generic [ref=e463]: "%"
+            - generic [ref=e464]:
+              - generic [ref=e465]: 混合模式
+              - generic [ref=e466] [cursor=pointer]:
+                - generic [ref=e467]: 正常
+                - generic [ref=e468]: 
+            - generic [ref=e469]:
+              - generic [ref=e470]:
+                - generic [ref=e471]: 图层样式
+                - generic "添加图层样式" [ref=e472] [cursor=pointer]: +
+              - generic [ref=e473]: 暂无图层样式
+        - generic [ref=e474]:
+          - generic [ref=e475] [cursor=pointer]:
+            - generic [ref=e476]: 文字
+            - generic [ref=e477]: 
+          - generic [ref=e478]:
+            - generic [ref=e479] [cursor=pointer]:
+              - generic [ref=e480]: HarmonyOS Sans SC
+              - generic [ref=e481]: 
+            - generic [ref=e482]:
+              - generic [ref=e483]:
+                - generic [ref=e484]: 字号
+                - generic [ref=e485]: 34 pt
+              - generic [ref=e486]:
+                - generic [ref=e487]: 行距
+                - generic [ref=e488]: 38 pt
+              - generic [ref=e489]:
+                - generic [ref=e490]: 字距
+                - generic [ref=e491]: "0"
+              - generic [ref=e492]:
+                - generic [ref=e493]: 基线
+                - generic [ref=e494]: 0 pt
+            - generic [ref=e495]:
+              - generic "加粗 Ctrl+B" [ref=e496] [cursor=pointer]: B
+              - generic "斜体 Ctrl+I" [ref=e498] [cursor=pointer]: I
+              - generic "下划线 Ctrl+U" [ref=e500] [cursor=pointer]: U
+              - generic "左对齐" [ref=e502] [cursor=pointer]: 
+              - generic "居中" [ref=e504] [cursor=pointer]: 
+              - generic "右对齐" [ref=e506] [cursor=pointer]: 
+              - generic "两端对齐" [ref=e508] [cursor=pointer]: 
+            - generic [ref=e510]:
+              - generic [ref=e511]:
+                - generic [ref=e512]: 段前
+                - generic [ref=e513]: 0 pt
+              - generic [ref=e514]:
+                - generic [ref=e515]: 段后
+                - generic [ref=e516]: 8 pt
+              - generic [ref=e517]:
+                - generic [ref=e518]: 首行
+                - generic [ref=e519]: 2em
+        - generic [ref=e520]:
+          - generic [ref=e521] [cursor=pointer]:
+            - generic [ref=e522]: 路径查找器
+            - generic [ref=e523]: 
+          - generic [ref=e525]:
+            - generic "合集" [ref=e526] [cursor=pointer]
+            - generic "差集" [ref=e527] [cursor=pointer]
+            - generic "交集" [ref=e528] [cursor=pointer]
+            - generic "排除" [ref=e529] [cursor=pointer]
+        - generic [ref=e530]:
+          - generic [ref=e531] [cursor=pointer]:
+            - generic [ref=e532]: 页面属性
+            - generic [ref=e533]: 
+          - generic [ref=e534]:
+            - generic [ref=e535]: 尺寸与单位
+            - generic [ref=e537]:
+              - generic [ref=e538] [cursor=pointer]: A4
+              - generic [ref=e539] [cursor=pointer]: A3
+              - generic [ref=e540] [cursor=pointer]: A5
+              - generic [ref=e541] [cursor=pointer]: 信纸
+              - generic [ref=e542] [cursor=pointer]: 法律
+            - generic [ref=e543]:
+              - generic [ref=e544]:
+                - generic [ref=e545]: 宽度
+                - generic [ref=e546]: 210 mm
+              - generic [ref=e547]:
+                - generic [ref=e548]: 高度
+                - generic [ref=e549]: 297 mm
+              - generic [ref=e550] [cursor=pointer]:
+                - generic [ref=e551]: 方向
+                - generic [ref=e552]: 纵向
+              - generic [ref=e553] [cursor=pointer]:
+                - generic [ref=e554]: 单位
+                - generic [ref=e555]: mm
+              - generic [ref=e556] [cursor=pointer]:
+                - generic [ref=e557]: DPI
+                - generic [ref=e558]: 300 DPI
+            - generic [ref=e559]:
+              - generic [ref=e560]: 出血
+              - generic [ref=e561] [cursor=pointer]: 启用
+            - generic [ref=e565]:
+              - generic [ref=e566]: 边距
+              - generic [ref=e567]:
+                - generic [ref=e568] [cursor=pointer]: 窄
+                - generic [ref=e569] [cursor=pointer]: 常规
+                - generic [ref=e570] [cursor=pointer]: 宽
+            - generic [ref=e571]:
+              - generic [ref=e572]:
+                - generic [ref=e573]: 上
+                - generic [ref=e574]: 20 mm
+              - generic [ref=e575]:
+                - generic [ref=e576]: 下
+                - generic [ref=e577]: 20 mm
+              - generic [ref=e578]:
+                - generic [ref=e579]: 左
+                - generic [ref=e580]: 15 mm
+              - generic [ref=e581]:
+                - generic [ref=e582]: 右
+                - generic [ref=e583]: 15 mm
+            - generic [ref=e584]: 分栏
+            - generic [ref=e586]:
+              - generic [ref=e587]:
+                - generic [ref=e588]: 栏数
+                - generic [ref=e589]: "12"
+              - generic [ref=e590]:
+                - generic [ref=e591]: 间距
+                - generic [ref=e592]: 8 mm
+        - generic [ref=e593]:
+          - generic [ref=e594] [cursor=pointer]:
+            - generic [ref=e595]: 色彩管理
+            - generic [ref=e596]: 
+          - generic [ref=e598]:
+            - generic [ref=e607]:
+              - generic [ref=e608]: HEX
+              - textbox [ref=e609]: "#3AC487"
+            - generic [ref=e610]:
+              - generic [ref=e611] [cursor=pointer]: RGB
+              - generic [ref=e612] [cursor=pointer]: HSL
+              - generic [ref=e613] [cursor=pointer]: CMYK
+            - generic [ref=e614]:
+              - generic [ref=e615]:
+                - generic [ref=e616]: R
+                - spinbutton [ref=e618]: "58"
+              - generic [ref=e619]:
+                - generic [ref=e620]: G
+                - spinbutton [ref=e622]: "196"
+              - generic [ref=e623]:
+                - generic [ref=e624]: B
+                - spinbutton [ref=e626]: "135"
+            - generic [ref=e627]:
+              - generic [ref=e628]: 色板
+              - generic [ref=e629]:
+                - generic "取色" [ref=e630] [cursor=pointer]: 
+                - generic "添加色板" [ref=e631] [cursor=pointer]: +
+            - generic [ref=e632]:
+              - generic "#3AC487" [ref=e633] [cursor=pointer]
+              - generic "#16865F" [ref=e634] [cursor=pointer]
+              - generic "#0D5A3D" [ref=e635] [cursor=pointer]
+              - generic "#3B82F6" [ref=e636] [cursor=pointer]
+              - generic "#22C55E" [ref=e637] [cursor=pointer]
+              - generic "#F59E0B" [ref=e638] [cursor=pointer]
+              - generic "#EF4444" [ref=e639] [cursor=pointer]
+              - generic "#263238" [ref=e640] [cursor=pointer]
+              - generic "#FFFFFF" [ref=e641] [cursor=pointer]
+              - generic "#000000" [ref=e642] [cursor=pointer]
+            - generic [ref=e643]:
+              - generic [ref=e644]:
+                - generic [ref=e645]: 配置文件
+                - combobox [ref=e646]:
+                  - option "sRGB IEC61966-2.1" [selected]
+                  - option "Adobe RGB (1998)"
+                  - option "Display P3"
+                  - option "CMYK Coated FOGRA39"
+                  - option "CMYK Uncoated FOGRA29"
+                  - option "ProPhoto RGB"
+                  - option "Apple RGB"
+              - generic [ref=e647]:
+                - generic [ref=e648]: 渲染
+                - combobox [ref=e649]:
+                  - option "相对比色" [selected]
+                  - option "绝对比色"
+                  - option "可感知"
+                  - option "饱和度"
+        - generic [ref=e650]:
+          - generic [ref=e651] [cursor=pointer]:
+            - generic [ref=e652]:
+              - generic [ref=e653]: 
+              - generic [ref=e654]: 画布属性
+            - generic [ref=e655]: 
+          - generic [ref=e656]:
+            - generic [ref=e657]:
+              - generic [ref=e658]: 背景色
+              - textbox [ref=e661]: "#ECEDEF"
+            - generic [ref=e662]:
+              - generic [ref=e663]:
+                - generic [ref=e664]: 工作区宽度
+                - generic [ref=e665]:
+                  - spinbutton [ref=e666]: "1440"
+                  - generic [ref=e667]: px
+              - generic [ref=e668]:
+                - generic [ref=e669]: 工作区高度
+                - generic [ref=e670]:
+                  - spinbutton [ref=e671]: "960"
+                  - generic [ref=e672]: px
+            - generic [ref=e674]:
+              - generic [ref=e675]: 网格
+              - generic [ref=e676] [cursor=pointer]: 隐藏
+            - generic [ref=e680]:
+              - generic [ref=e681]: 吸附
+              - generic [ref=e682] [cursor=pointer]: 开启
+            - generic [ref=e686]:
+              - generic [ref=e687] [cursor=pointer]: 网格
+              - generic [ref=e691] [cursor=pointer]: 参考线
+            - generic [ref=e695]:
+              - generic [ref=e696]: 标尺
+              - generic [ref=e697] [cursor=pointer]: 显示标尺
+        - generic [ref=e701]:
+          - generic [ref=e702]:
+            - generic [ref=e703]: 图层
+            - generic [ref=e704]: 9 层
+          - generic [ref=e705]:
+            - generic [ref=e706] [cursor=pointer]:
+              - generic [ref=e707]: 正常
+              - generic [ref=e708]: 
+            - generic [ref=e709] [cursor=pointer]:
+              - generic [ref=e710]: 100%
+              - generic [ref=e711]: 
+            - generic [ref=e712]:
+              - generic "锁定透明像素" [ref=e713] [cursor=pointer]: 
+              - generic "锁定图像像素" [ref=e714] [cursor=pointer]: 
+              - generic "锁定位置" [ref=e715] [cursor=pointer]: 
+          - generic [ref=e716]:
+            - generic [ref=e717]: 
+            - textbox "筛选图层..." [ref=e718]
+            - generic "排序" [ref=e719] [cursor=pointer]: 
+            - generic "图层筛选" [ref=e720] [cursor=pointer]: 
+          - generic [ref=e721]:
+            - generic [ref=e722] [cursor=pointer]:
+              - generic [ref=e723]:
+                - generic [ref=e724]: 
+                - generic [ref=e725]: 
+                - generic [ref=e727]: 组 1
+              - generic [ref=e728]: 
+            - generic [ref=e730] [cursor=pointer]:
+              - generic [ref=e731]:
+                - generic [ref=e732]: 
+                - generic [ref=e734]: 构想，让设计发生
+              - generic [ref=e735]:
+                - generic "添加图层蒙版" [ref=e736]: 
+                - generic [ref=e737]: 
+            - generic [ref=e738] [cursor=pointer]:
+              - generic [ref=e739]:
+                - generic [ref=e740]: 
+                - generic [ref=e742]: 正文段落
+              - generic [ref=e743]:
+                - generic "添加图层蒙版" [ref=e744]: 
+                - generic [ref=e745]: 
+            - generic [ref=e746] [cursor=pointer]:
+              - generic [ref=e747]:
+                - generic [ref=e748]: 
+                - generic "禁用蒙版" [ref=e750]
+                - generic [ref=e752]: Image 01
+              - generic [ref=e753]:
+                - generic "禁用蒙版" [ref=e754]: 
+                - generic [ref=e755]: 
+            - generic [ref=e756] [cursor=pointer]:
+              - generic [ref=e757]:
+                - generic [ref=e758]: 
+                - generic [ref=e760]: Green Shape
+              - generic [ref=e761]:
+                - generic "添加图层蒙版" [ref=e762]: 
+                - generic [ref=e763]: 
+            - generic [ref=e764] [cursor=pointer]:
+              - generic [ref=e765]:
+                - generic [ref=e766]: 
+                - generic "启用蒙版" [ref=e768]
+                - generic [ref=e770]: 色相/饱和度
+              - generic [ref=e771]:
+                - generic "启用蒙版" [ref=e772]: 
+                - generic [ref=e773]: 
+            - generic [ref=e774] [cursor=pointer]:
+              - generic [ref=e775]:
+                - generic [ref=e776]: 
+                - generic [ref=e778]: Background
+              - generic [ref=e779]:
+                - generic "添加图层蒙版" [ref=e780]: 
+                - generic [ref=e781]: 
+                - generic [ref=e782]: 
+            - generic [ref=e783] [cursor=pointer]:
+              - generic [ref=e784]:
+                - generic [ref=e785]: 
+                - generic [ref=e787]: 纯色填充
+              - generic [ref=e788]:
+                - generic "添加图层蒙版" [ref=e789]: 
+                - generic [ref=e790]: 
+            - generic [ref=e791] [cursor=pointer]:
+              - generic [ref=e792]:
+                - generic [ref=e793]: 
+                - generic "禁用蒙版" [ref=e795]
+                - generic [ref=e797]: 智能对象
+              - generic [ref=e798]:
+                - generic "禁用蒙版" [ref=e799]: 
+                - generic [ref=e800]: 
+                - generic [ref=e801]: 
+          - generic [ref=e802]:
+            - generic [ref=e803]:
+              - generic "链接图层" [ref=e804] [cursor=pointer]: 
+              - generic "添加图层样式 fx" [ref=e805] [cursor=pointer]: 
+              - generic "添加图层蒙版" [ref=e806] [cursor=pointer]: 
+              - generic "创建新的填充或调整图层" [ref=e808] [cursor=pointer]:
+                - text: 
+                - generic [ref=e809]: 
+              - generic "新建组" [ref=e810] [cursor=pointer]: 
+              - generic "新建图层" [ref=e811] [cursor=pointer]: +
+            - generic "删除图层" [ref=e813] [cursor=pointer]: 
+    - generic [ref=e814]:
+      - generic [ref=e815]:
+        - generic "点击修改色彩空间" [ref=e816] [cursor=pointer]:
+          - generic [ref=e817]: sRGB IEC61966-2.1
+          - generic [ref=e818]: 
+        - generic "点击修改文档尺寸" [ref=e819] [cursor=pointer]:
+          - generic [ref=e820]: 595 × 842 mm
+          - generic [ref=e821]: 
+        - generic "点击跳转页面" [ref=e822] [cursor=pointer]:
+          - generic [ref=e823]: 内容 · 4 图层
+          - generic [ref=e824]: 
+      - generic [ref=e825]:
+        - generic [ref=e826]:
+          - generic [ref=e827]: 最近
+          - generic "#3AC487" [ref=e828] [cursor=pointer]
+          - generic "#1F2329" [ref=e829] [cursor=pointer]
+          - generic "#FFFFFF" [ref=e830] [cursor=pointer]
+          - generic "#F3F4F6" [ref=e831] [cursor=pointer]
+          - generic "#E5E7EB" [ref=e832] [cursor=pointer]
+          - generic "#9CA3AF" [ref=e833] [cursor=pointer]
+          - generic [ref=e835]: 常用
+          - generic "#3AC487" [ref=e836] [cursor=pointer]
+          - generic "#16865F" [ref=e837] [cursor=pointer]
+          - generic "#3B82F6" [ref=e838] [cursor=pointer]
+          - generic "#EF4444" [ref=e839] [cursor=pointer]
+          - generic "#F59E0B" [ref=e840] [cursor=pointer]
+          - generic "#8B5CF6" [ref=e841] [cursor=pointer]
+          - generic "#EC4899" [ref=e842] [cursor=pointer]
+          - generic "#14B8A6" [ref=e843] [cursor=pointer]
+          - generic "#6B7280" [ref=e844] [cursor=pointer]
+          - generic "#FF6B6B" [ref=e845] [cursor=pointer]
+          - generic "#4ECDC4" [ref=e846] [cursor=pointer]
+          - generic "#45B7D1" [ref=e847] [cursor=pointer]
+          - generic "#96CEB4" [ref=e848] [cursor=pointer]
+          - generic "#FFEAA7" [ref=e849] [cursor=pointer]
+          - generic "#DDA0DD" [ref=e850] [cursor=pointer]
+          - generic "#98D8C8" [ref=e851] [cursor=pointer]
+          - generic "#F7DC6F" [ref=e852] [cursor=pointer]
+          - generic "#BB8FCE" [ref=e853] [cursor=pointer]
+          - generic "#85C1E9" [ref=e854] [cursor=pointer]
+          - generic "添加到常用" [ref=e855] [cursor=pointer]: +
+          - generic [ref=e857]: "#3AC487"
+        - generic [ref=e860]:
+          - generic [ref=e861]: 
+          - generic [ref=e862]: 未保存
+        - generic [ref=e863]:
+          - generic [ref=e864] [cursor=pointer]: 
+          - generic [ref=e867] [cursor=pointer]: +
+          - generic [ref=e868]: 100%
+  - generic [ref=e906]:
+    - generic [ref=e907]:
+      - generic [ref=e916]:
+        - generic [ref=e917]: HEX
+        - textbox [ref=e918]: "#3AC487"
+      - generic [ref=e919]:
+        - generic [ref=e920] [cursor=pointer]: RGB
+        - generic [ref=e921] [cursor=pointer]: HSL
+        - generic [ref=e922] [cursor=pointer]: CMYK
+      - generic [ref=e923]:
+        - generic [ref=e924]:
+          - generic [ref=e925]: R
+          - spinbutton [ref=e927]: "58"
+        - generic [ref=e928]:
+          - generic [ref=e929]: G
+          - spinbutton [ref=e931]: "196"
+        - generic [ref=e932]:
+          - generic [ref=e933]: B
+          - spinbutton [ref=e935]: "135"
+      - generic [ref=e936]:
+        - generic [ref=e937]: 色板
+        - generic [ref=e938]:
+          - generic "取色" [ref=e939] [cursor=pointer]: 
+          - generic "添加色板" [ref=e940] [cursor=pointer]: +
+      - generic [ref=e941]:
+        - generic "#3AC487" [ref=e942] [cursor=pointer]
+        - generic "#16865F" [ref=e943] [cursor=pointer]
+        - generic "#0D5A3D" [ref=e944] [cursor=pointer]
+        - generic "#3B82F6" [ref=e945] [cursor=pointer]
+        - generic "#22C55E" [ref=e946] [cursor=pointer]
+        - generic "#F59E0B" [ref=e947] [cursor=pointer]
+        - generic "#EF4444" [ref=e948] [cursor=pointer]
+        - generic "#263238" [ref=e949] [cursor=pointer]
+        - generic "#FFFFFF" [ref=e950] [cursor=pointer]
+        - generic "#000000" [ref=e951] [cursor=pointer]
+      - generic [ref=e952]:
+        - generic [ref=e953]:
+          - generic [ref=e954]: 配置文件
+          - combobox [ref=e955]:
+            - option "sRGB IEC61966-2.1" [selected]
+            - option "Adobe RGB (1998)"
+            - option "Display P3"
+            - option "CMYK Coated FOGRA39"
+            - option "CMYK Uncoated FOGRA29"
+            - option "ProPhoto RGB"
+            - option "Apple RGB"
+        - generic [ref=e956]:
+          - generic [ref=e957]: 渲染
+          - combobox [ref=e958]:
+            - option "相对比色" [selected]
+            - option "绝对比色"
+            - option "可感知"
+            - option "饱和度"
+    - generic [ref=e959]:
+      - generic [ref=e960]:
+        - generic [ref=e961]: α
+        - slider [ref=e962] [cursor=pointer]: "100"
+        - generic [ref=e963]: 100%
+      - button "取消" [ref=e964]

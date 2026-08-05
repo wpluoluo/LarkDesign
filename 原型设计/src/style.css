@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+html,
+body,
+#app {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Noto Sans SC", -apple-system, "Microsoft YaHei", sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  color: var(--color-body);
+  background: var(--color-bg);
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+#app {
+  height: 100vh;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ── Design Tokens (Light) ── */
+:root {
+  /* Brand colors - slightly softened for long-session comfort */
+  --color-primary: #34B87A;
+  --color-primary-dark-900: #0E5A3D;
+  --color-primary-dark-700: #1A7D5A;
+  --color-primary-light-300: #A3DFC4;
+  --color-primary-light-100: #E4F7EE;
+
+  /* Functional colors - slightly desaturated */
+  --color-info: #4A8FE7;
+  --color-success: #2EBD6B;
+  --color-warning: #E8A33D;
+  --color-error: #E55555;
+
+  /* Neutral colors - warm undertone to reduce eye strain */
+  --color-title: #1C2026;
+  --color-body: #333940;
+  --color-secondary: #525B65;
+  --color-tertiary: #636D78;
+  --color-muted: #78828D;
+  --color-border: #D9DDE2;
+  --color-border-light: #E8EAED;
+  --color-panel: #F8F9FA;
+  --color-bg: #F3F5F7;
+  --color-white: #FFFFFF;
+  --color-surface: #FFFFFF;
+
+  /* Specific UI colors */
+  --color-canvas-bg: #E9EBEE;
+  --color-hover-bg: #EFF8F4;
+  --color-focus-ring: #34B87A;
+
+  /* Page (always white) */
+  --color-page: #FFFFFF;
+
+  /* Ruler */
+  --color-ruler-bg: #F8F9FA;
+  --color-ruler-border: #D5D9DE;
+  --color-ruler-tick: #CDD2D8;
+  --color-ruler-text: #8D959E;
+  --color-ruler-corner: #B4BAC2;
+
+  /* Spacing scale */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+}
+
+/* ── Dark Mode - warm dark for reduced eye strain ── */
+.dark {
+  --color-title: #E9EBED;
+  --color-body: #C5C9CE;
+  --color-secondary: #9BA3AC;
+  --color-tertiary: #7E8790;
+  --color-muted: #68717A;
+  --color-border: #383D44;
+  --color-border-light: #2D3238;
+  --color-panel: #1D2126;
+  --color-bg: #131618;
+  --color-white: #1A1E22;
+  --color-surface: #1D2126;
+  --color-canvas-bg: #0F1214;
+  --color-hover-bg: #14352A;
+
+  --color-primary-dark-900: #82DFB4;
+  --color-primary-dark-700: #5CD4A2;
+  --color-primary-light-300: #1A5A40;
+  --color-primary-light-100: #0E3A28;
+
+  --color-ruler-bg: #1D2126;
+  --color-ruler-border: #383D44;
+  --color-ruler-tick: #484F57;
+  --color-ruler-text: #68717A;
+  --color-ruler-corner: #566069;
+}
+
+/* ── Font utilities & Micro-interactions ── */
+@layer base {
+  html, body {
+    height: 100%;
+  }
+
+  .font-primary {
+    font-family: "Inter", "Noto Sans SC", -apple-system, "Microsoft YaHei", sans-serif;
+  }
+
+  .font-mono {
+    font-family: "JetBrains Mono", "SF Mono", "Consolas", monospace;
+    font-feature-settings: "zero", "ss01";
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  /* Smooth selection */
+  ::selection {
+    background: rgba(58, 196, 135, 0.2);
+    color: inherit;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 1px;
+    border-radius: 4px;
+  }
+
+  /* Webkit scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
+  }
+}
+
+/* ── Global transitions ── */
+@layer utilities {
+  .transition-ui {
+    transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, opacity 0.12s ease, transform 0.12s ease;
+  }
+}
+
+/* ── Context menu / dropdown animation ── */
+.menu-enter-active {
+  transition: opacity 0.12s ease-out, transform 0.12s ease-out;
+}
+.menu-leave-active {
+  transition: opacity 0.08s ease-in, transform 0.08s ease-in;
+}
+.menu-enter-from {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.97);
+}
+.menu-leave-to {
+  opacity: 0;
+  transform: translateY(-2px) scale(0.98);
+}

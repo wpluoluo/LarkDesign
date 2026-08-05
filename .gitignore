@@ -1,0 +1,33 @@
+# Node
+node_modules/
+.pnpm-store/
+
+# HarmonyOS
+.hvigor/
+.idea/
+build/
+entry/build/
+oh_modules/
+
+# ArkUI-X
+.arkui-x/android/.gradle/
+.arkui-x/android/build/
+.arkui-x/ios/Pods/
+
+# NAPI C++ build
+napi/build/
+napi/third_party/skia/out/
+napi/third_party/lcms2/build/
+
+# Vue prototype
+原型设计/dist/
+原型设计/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.swp
+*.swo

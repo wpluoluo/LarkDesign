@@ -1,0 +1,39 @@
+name: LarkDesign CI
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run tests
+        run: pnpm test
+      - name: Type check
+        run: pnpm typecheck
+      - name: Build prototype
+        run: pnpm build
+
+  license-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      - name: Install dependencies
+        run: pnpm install
+      - name: List licenses
+        run: pnpm licenses list || echo "License scanning not yet configured"

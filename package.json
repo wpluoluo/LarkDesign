@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "build": "pnpm -C 原型设计 build",
+    "dev": "pnpm -C 原型设计 dev",
+    "typecheck": "pnpm -C 原型设计 exec vue-tsc --noEmit",
+    "lint": "echo 'Lint not yet configured; see code-linter.json5 for HarmonyOS lint'",
+    "clean": "pnpm -C 原型设计 clean 2>$null; Remove-Item -Recurse -Force node_modules/.vite -ErrorAction SilentlyContinue"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10"
+  }
+}

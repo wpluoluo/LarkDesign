@@ -1,0 +1,49 @@
+{
+  "float": [
+    { "name": "spacing_1", "value": "4vp" },
+    { "name": "spacing_2", "value": "8vp" },
+    { "name": "spacing_3", "value": "12vp" },
+    { "name": "spacing_4", "value": "16vp" },
+    { "name": "spacing_5", "value": "20vp" },
+    { "name": "spacing_6", "value": "24vp" },
+    { "name": "spacing_8", "value": "32vp" },
+    { "name": "spacing_10", "value": "40vp" },
+
+    { "name": "radius_sm", "value": "4vp" },
+    { "name": "radius_md", "value": "6vp" },
+    { "name": "radius_lg", "value": "8vp" },
+    { "name": "radius_xl", "value": "10vp" },
+    { "name": "radius_2xl", "value": "12vp" },
+
+    { "name": "font_size_1", "value": "10fp" },
+    { "name": "font_size_2", "value": "11fp" },
+    { "name": "font_size_3", "value": "12fp" },
+    { "name": "font_size_4", "value": "13fp" },
+    { "name": "font_size_title", "value": "16fp" },
+    { "name": "font_size_h1", "value": "48fp" },
+    { "name": "font_size_h2", "value": "32fp" },
+    { "name": "font_size_h3", "value": "24fp" },
+
+    { "name": "height_xs", "value": "24vp" },
+    { "name": "height_sm", "value": "28vp" },
+    { "name": "height_md", "value": "32vp" },
+    { "name": "height_lg", "value": "40vp" },
+    { "name": "height_xl", "value": "44vp" },
+
+    { "name": "page_text_font_size", "value": "50fp" },
+
+    { "name": "icon_size_xs", "value": "8vp" },
+    { "name": "icon_size_sm", "value": "9vp" },
+    { "name": "icon_size_md", "value": "10vp" },
+    { "name": "icon_size_lg", "value": "11vp" },
+    { "name": "icon_size_xl", "value": "12vp" },
+    { "name": "icon_size_2xl", "value": "14vp" },
+
+    { "name": "tool_rail_width", "value": "48vp" },
+    { "name": "pages_panel_width", "value": "200vp" },
+    { "name": "inspector_width", "value": "300vp" },
+    { "name": "menubar_height", "value": "32vp" },
+    { "name": "tool_options_bar_height", "value": "40vp" },
+    { "name": "status_bar_height", "value": "28vp" }
+  ]
+}

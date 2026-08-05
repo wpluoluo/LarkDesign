@@ -1,0 +1,11 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "LarkDesign HarmonyOS 主模块",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "liblark_engine.so": "file:../napi/build/libs/arm64-v8a/liblark_engine.so"
+  }
+}
