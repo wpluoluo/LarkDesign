@@ -44,9 +44,11 @@ struct Index {
     .width('100%')
     .height('100%')
     .backgroundColor($r('app.color.bg'))
-    .onKeyEvent((event: KeyEvent) => {
+.onKeyEvent((event: KeyEvent) => {
       if (event.type === KeyType.Down) {
         this.shortcuts.handleKeyEvent(event)
+      } else if (event.type === KeyType.Up) {
+        this.shortcuts.handleKeyUp(event)
       }
     })
   }

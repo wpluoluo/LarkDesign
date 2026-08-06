@@ -32,6 +32,33 @@ export type ShapeKind =
 /** Frame 类型 */
 export type FrameType = 'single' | 'poster' | 'book-page' | 'spread'
 
+/** 2D 坐标点 */
+export interface Point {
+  x: number
+  y: number
+}
+
+/** 2D 尺寸 */
+export interface Size {
+  width: number
+  height: number
+}
+
+/** 矩形区域 */
+export interface Rect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/** 适配视口结果 */
+export interface FitToFramesResult {
+  zoom: number
+  panX: number
+  panY: number
+}
+
 /** 变换矩阵 */
 export interface Transform {
   x: number
@@ -54,11 +81,30 @@ export interface Mask {
   inverted: boolean
 }
 
+/** 效果参数 */
+export interface EffectParams {
+  color?: string
+  opacity?: number
+  blur?: number
+  distance?: number
+  angle?: number
+  spread?: number
+  style?: string
+  depth?: number
+  direction?: string
+  size?: number
+  soften?: number
+  gradient?: string
+  scale?: number
+  src?: string
+}
+
 /** 图层效果 */
 export interface LayerEffect {
   id: string
   type: string
   enabled: boolean
+  params: EffectParams
 }
 
 /** 渐变停止点 */
@@ -166,6 +212,10 @@ export interface SceneObject extends BaseNode {
   adjustmentType?: string
   // fill
   fillType?: string
+  gradient?: Gradient
+  // appearance
+
+  strokePosition?: string
 }
 
 /** 图层容器 */
@@ -252,4 +302,16 @@ export interface HdsDocument {
   version: string
   scene: Scene
   metadata: DocumentMetadata
+}
+
+/** 右键菜单项 */
+export interface ContextMenuItem {
+  label?: string
+  icon?: string
+  shortcut?: string
+  action?: string
+  children?: ContextMenuItem[]
+  divider?: boolean
+  disabled?: boolean
+  danger?: boolean
 }

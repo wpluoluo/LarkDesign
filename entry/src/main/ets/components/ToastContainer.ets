@@ -19,7 +19,7 @@ interface ToastItem {
 @Component
 export struct ToastContainer {
   // 与 MenuBar 绑定的字段统一（toastMessage/toastIcon/toastType/toastVisible）
-  @StorageLink('toastMessage') toastMessage: string = ''
+  @StorageLink('toastMessage') @Watch('onToastMessageChange') toastMessage: string = ''
   @StorageLink('toastIcon') toastIcon: string = ''
   @StorageLink('toastType') toastType: string = 'info'
   @StorageLink('toastVisible') toastVisible: boolean = false
@@ -41,7 +41,7 @@ export struct ToastContainer {
     }
   }
 
-  @Monitor('toastMessage')
+
   onToastMessageChange(): void {
     if (this.toastVisible && this.toastMessage !== '' && this.lastMessage !== this.toastMessage) {
       this.lastMessage = this.toastMessage

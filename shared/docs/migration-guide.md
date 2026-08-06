@@ -112,20 +112,21 @@ UI (ArkTS) → Feature (ArkTS) → Domain (纯 TS/ArkTS) → Port (NAPI/系统 A
 - [ ] shared/algorithms/hitTest.ts（命中检测）
 - [ ] shared/algorithms/coordinate.ts（坐标转换）
 
-### 阶段四：画布渲染引擎
-- [ ] CanvasRenderer（ArkUI Canvas 渲染器）
-- [ ] CanvasInteraction（交互引擎，替换 useCanvasInteraction）
-- [ ] InfiniteCanvas（无限画布，替换 useInfiniteCanvas）
-- [ ] FrameView 组件
+### 阶段四：画布渲染引擎 ✅ 已完成
+- [x] CanvasRenderer（渲染辅助引擎：对象查询/样式计算/包围盒/导出辅助，198 行）
+- [x] CanvasInteraction（交互引擎：选中/拖拽/Resize/框选/绘制/命中检测，359 行）
+- [x] InfiniteCanvas（视口引擎：平移/缩放/坐标转换/适配视口，205 行）
+- [x] FrameView 组件
+- 注：CanvasStage.ets 从 899 行精简至 767 行，内联逻辑已抽取到三个独立类
 
-### 阶段五：交互逻辑迁移
-- [ ] 工具切换与形状绘制
-- [ ] 选中/拖拽/resize/框选
-- [ ] 双击编辑
-- [ ] 复制粘贴剪切
-- [ ] 撤销重做
-- [ ] 键盘快捷键
-- [ ] 右键菜单
+### 阶段五：交互逻辑迁移 ✅ 已完成
+- [x] 工具切换与形状绘制（CanvasInteraction.startDrawing/commitDrawing）
+- [x] 选中/拖拽/resize/框选（CanvasInteraction.startDrag/computeDragPosition/computeResize/commitBoxSelect）
+- [x] 双击编辑（CanvasInteraction.startTextEdit/cancelTextEdit）
+- [x] 复制粘贴剪切（右键菜单）
+- [x] 撤销重做（FusionDocumentStore）
+- [x] 键盘快捷键（utils/KeyboardShortcuts.ets）
+- [x] 右键菜单（ContextMenu.ets）
 
 ### 阶段六：高级功能
 - [ ] Inspector 完整双向绑定

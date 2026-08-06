@@ -2,58 +2,43 @@
  * HistoryPanel - 历史记录面板
  *
  * 对应原型 src/components/HistoryPanel.vue
- * 精准还原：标题栏 + 快照条（相机图标 + 步数）+ 撤销/重做进度条 + 历史列表 + 底部统计
+ * 从 FusionDocumentStore 读取真实历史记录数据
  */
 import { ColorToken } from '../tokens/DesignTokens'
 import { FontSizeToken, FontWeightConstant } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
-
-interface HistoryItem {
-  key: string
-  label: string
-  icon: string
-  index: number
-  current: boolean
-  future: boolean
-  canRedo: boolean
-  timestamp: string
-}
+import { FusionDocumentStore, HistoryEntry } from '../stores/FusionDocumentStore'
+import { ToastStore } from '../stores/ToastStore'
 
 @Component
 export struct HistoryPanel {
   private fusionStore: FusionDocumentStore = FusionDocumentStore.getInstance()
+  private toast: ToastStore = ToastStore.getInstance()
   @State collapsed: boolean = false
   @State hoveredItem: string = ''
   @State hoveredBtn: string = ''
-  @State undoCount: number = 0
-  @State redoCount: number = 0
   @State showOptions: boolean = false
-  @State currentIndex: number = 6
-  // 折叠动画宽度
   @State panelWidth: number = 200
 
-  aboutToAppear(): void {
-    this.syncHistory()
+  @StorageLink('historyVersion') historyVersion: number = 0
+
+  private get historyEntries(): HistoryEntry[] {
+    return this.fusionStore.getHistoryEntries()
   }
 
-  private syncHistory(): void {
-    this.undoCount = this.fusionStore.getHistoryUndoCount()
-    this.redoCount = this.fusionStore.getHistoryRedoCount()
+  private get undoCount(): number {
+    return this.fusionStore.getHistoryUndoCount()
   }
 
-  private historyList: HistoryItem[] = [
-    { key: 'h1', label: '新建矩形', icon: Icon.plus, index: 1, current: false, future: false, canRedo: false, timestamp: '14:32' },
-    { key: 'h2', label: '调整位置', icon: Icon.cursor, index: 2, current: false, future: false, canRedo: false, timestamp: '14:33' },
-    { key: 'h3', label: '修改填充色', icon: Icon.palette, index: 3, current: false, future: false, canRedo: false, timestamp: '14:35' },
-    { key: 'h4', label: '添加文字', icon: Icon.text, index: 4, current: false, future: false, canRedo: false, timestamp: '14:36' },
-    { key: 'h5', label: '手动快照', icon: Icon.camera, index: 5, current: false, future: false, canRedo: false, timestamp: '14:38' },
-    { key: 'h6', label: '编组对象', icon: Icon.group, index: 6, current: true, future: false, canRedo: false, timestamp: '14:42' },
-    { key: 'h7', label: '删除图片', icon: Icon.trash, index: 7, current: false, future: true, canRedo: true, timestamp: '14:45' },
-    { key: 'h8', label: '修改圆角', icon: Icon.grid, index: 8, current: false, future: true, canRedo: true, timestamp: '14:48' },
-  ]
+  private get redoCount(): number {
+    return this.fusionStore.getHistoryRedoCount()
+  }
 
-  /** 根据描述动态推断图标（对应原型 describeToIcon） */
+  private get undoProgress(): number {
+    return this.fusionStore.getHistoryUndoProgress()
+  }
+
+  /** 根据描述动态推断图标 */
   private describeToIcon(desc: string): string {
     if (desc.includes('新增') || desc.includes('创建') || desc.includes('新建')) return Icon.plus
     if (desc.includes('删除') || desc.includes('移除')) return Icon.trash
@@ -73,15 +58,40 @@ export struct HistoryPanel {
     if (desc.includes('复制') || desc.includes('克隆')) return Icon.copy
     if (desc.includes('翻转')) return Icon.flip_h
     if (desc.includes('旋转')) return Icon.rotate
+    if (desc.includes('快照')) return Icon.camera
     return Icon.history
   }
 
-  /** 切换折叠状态并播放宽度过渡动画 */
   private toggleCollapse(): void {
     animateTo({ duration: 200, curve: Curve.EaseInOut }, () => {
       this.collapsed = !this.collapsed
       this.panelWidth = this.collapsed ? 36 : 200
     })
+  }
+
+  private onUndo(): void {
+    if (this.fusionStore.canUndo()) {
+      this.fusionStore.undo()
+      this.toast.show('已撤销', Icon.undo, 'info')
+    }
+  }
+
+  private onRedo(): void {
+    if (this.fusionStore.canRedo()) {
+      this.fusionStore.redo()
+      this.toast.show('已重做', Icon.redo, 'info')
+    }
+  }
+
+  private onItemClick(item: HistoryEntry): void {
+    if (item.current) return
+    this.fusionStore.jumpToHistory(item.index)
+    this.toast.show(`跳转到: ${item.label}`, Icon.history, 'info')
+  }
+
+  private onSnapshot(): void {
+    this.fusionStore.pushHistory('手动快照')
+    this.toast.show('已创建快照', Icon.camera, 'success')
   }
 
   build(): void {
@@ -102,7 +112,6 @@ export struct HistoryPanel {
         }
         .layoutWeight(1)
 
-        // 折叠按钮（原型：chevron 在前，p-[4px] 自适应 ≈ 17×17）
         Column() {
           Text(this.collapsed ? Icon.chevron_right : Icon.chevron_left)
             .fontSize(9)
@@ -119,7 +128,6 @@ export struct HistoryPanel {
         .onClick(() => { this.toggleCollapse() })
 
         if (!this.collapsed) {
-          // 选项按钮（原型：ellipsis 在后，gap-[4px]，p-[4px] 自适应）
           Column() {
             Text(Icon.ellipsis)
               .fontSize(9)
@@ -144,35 +152,18 @@ export struct HistoryPanel {
       .border({ width: { bottom: 1 }, color: { bottom: ColorToken.border } })
 
       if (!this.collapsed) {
-        // ─── 快照条（原型：相机图标 + flex-1 占位 + 步数） ───
+        // 快照条
         Row() {
-          // 相机图标（新建快照，原型：text-[8px]，无容器，仅 hover 颜色变化）
           Text(Icon.camera)
             .fontSize(8)
             .fontColor(this.hoveredBtn === 'snapshot' ? ColorToken.primary : ColorToken.tertiary)
             .textAlign(TextAlign.Center)
             .onHover((isHover: boolean) => { this.hoveredBtn = isHover ? 'snapshot' : '' })
-            .onClick(() => {
-              // 新建快照：在当前 index 后插入一条
-              const newIndex: number = this.currentIndex + 1
-              this.currentIndex = newIndex
-              this.historyList = this.historyList.map((h: HistoryItem): HistoryItem => {
-                const item: HistoryItem = {
-                  key: h.key, label: h.label, icon: h.icon, index: h.index,
-                  current: h.index === newIndex, future: h.index > newIndex, canRedo: h.index > newIndex,
-                  timestamp: h.timestamp,
-                }
-                return item
-              })
-              this.undoCount = newIndex
-              this.redoCount = this.historyList.length - newIndex
-            })
+            .onClick(() => { this.onSnapshot() })
 
-          // flex-1 占位
           Blank()
             .layoutWeight(1)
 
-          // 步数（原型：仅显示 undoStack.length 步）
           Text(`${this.undoCount} 步`)
             .fontSize(8)
             .fontWeight(FontWeightConstant.medium)
@@ -185,9 +176,8 @@ export struct HistoryPanel {
         .backgroundColor(ColorToken.panel)
         .border({ width: { bottom: 1 }, color: { bottom: ColorToken.border_light } })
 
-        // ─── Undo/Redo 进度条（原型：h-[24px]，gap-[6px]，图标无容器） ───
+        // Undo/Redo 进度条
         Row() {
-          // 撤销按钮（原型：text-[8px]，无容器）
           Text(Icon.backward)
             .fontSize(8)
             .fontColor(this.undoCount > 0
@@ -195,26 +185,11 @@ export struct HistoryPanel {
               : ColorToken.border)
             .textAlign(TextAlign.Center)
             .onHover((isHover: boolean) => { this.hoveredBtn = isHover ? 'undo' : '' })
-            .onClick(() => {
-              if (this.undoCount > 0) {
-                this.undoCount = this.undoCount - 1
-                this.redoCount = this.redoCount + 1
-                this.currentIndex = this.undoCount
-                this.historyList = this.historyList.map((h: HistoryItem): HistoryItem => {
-                  const item: HistoryItem = {
-                    key: h.key, label: h.label, icon: h.icon, index: h.index,
-                    current: h.index === this.undoCount, future: h.index > this.undoCount, canRedo: h.index > this.undoCount,
-                    timestamp: h.timestamp,
-                  }
-                  return item
-                })
-              }
-            })
+            .onClick(() => { this.onUndo() })
 
-          // 进度条（原型：h-[3px]，无滑块，gap-[6px]）
           Row() {
             Column()
-              .width(`${(this.undoCount / (this.undoCount + this.redoCount)) * 100}%`)
+              .width(`${this.undoProgress}%`)
               .height('100%')
               .backgroundColor(ColorToken.primary)
               .borderRadius(2)
@@ -224,23 +199,8 @@ export struct HistoryPanel {
           .backgroundColor(ColorToken.border)
           .borderRadius(2)
           .margin({ left: 6, right: 6 })
-          .onClick(() => {
-            if (this.undoCount > 0) {
-              this.undoCount = this.undoCount - 1
-              this.redoCount = this.redoCount + 1
-              this.currentIndex = this.undoCount
-              this.historyList = this.historyList.map((h: HistoryItem): HistoryItem => {
-                const item: HistoryItem = {
-                  key: h.key, label: h.label, icon: h.icon, index: h.index,
-                  current: h.index === this.undoCount, future: h.index > this.undoCount, canRedo: h.index > this.undoCount,
-                  timestamp: h.timestamp,
-                }
-                return item
-              })
-            }
-          })
+          .onClick(() => { this.onUndo() })
 
-          // 重做按钮（原型：text-[8px]，无容器）
           Text(Icon.forward)
             .fontSize(8)
             .fontColor(this.redoCount > 0
@@ -248,30 +208,15 @@ export struct HistoryPanel {
               : ColorToken.border)
             .textAlign(TextAlign.Center)
             .onHover((isHover: boolean) => { this.hoveredBtn = isHover ? 'redo' : '' })
-            .onClick(() => {
-              if (this.redoCount > 0) {
-                this.redoCount = this.redoCount - 1
-                this.undoCount = this.undoCount + 1
-                this.currentIndex = this.undoCount
-                this.historyList = this.historyList.map((h: HistoryItem): HistoryItem => {
-                  const item: HistoryItem = {
-                    key: h.key, label: h.label, icon: h.icon, index: h.index,
-                    current: h.index === this.undoCount, future: h.index > this.undoCount, canRedo: h.index > this.undoCount,
-                    timestamp: h.timestamp,
-                  }
-                  return item
-                })
-              }
-            })
+            .onClick(() => { this.onRedo() })
         }
         .width('100%')
         .height(24)
         .padding({ left: 10, right: 10 })
         .alignItems(VerticalAlign.Center)
 
-        // ─── 历史列表 ───
-        if (this.historyList.length === 0) {
-          // 空状态（原型：clock-rotate-left 图标 + 暂无历史记录 + 提示，gap-[8px]）
+        // 历史列表
+        if (this.historyEntries.length === 0) {
           Column() {
             Text(Icon.history)
               .fontSize(20)
@@ -295,18 +240,16 @@ export struct HistoryPanel {
         } else {
           Scroll() {
             Column() {
-              ForEach(this.historyList, (item: HistoryItem) => {
+              ForEach(this.historyEntries, (item: HistoryEntry) => {
                 Row() {
-                  // 左侧内容（序号 + 图标 + 标签，gap-[6px]）
                   Row() {
-                    // 序号 / 当前指示（w-[14px]，居中）
                     Column() {
                       if (item.current) {
                         Text(Icon.arrow_left)
                           .fontSize(8)
                           .fontColor(ColorToken.primary_dark_700)
                       } else {
-                        Text(`${item.index}`)
+                        Text(`${item.index + 1}`)
                           .fontSize(8)
                           .fontWeight(FontWeightConstant.medium)
                           .fontColor(ColorToken.muted)
@@ -316,13 +259,11 @@ export struct HistoryPanel {
                     .justifyContent(FlexAlign.Center)
                     .alignItems(HorizontalAlign.Center)
 
-                    // 图标（gap-[6px]）
-                    Text(item.icon)
+                    Text(this.describeToIcon(item.label))
                       .fontSize(8)
                       .fontColor(item.current ? ColorToken.primary_dark_700 : ColorToken.muted)
                       .margin({ left: 6 })
 
-                    // 标签（gap-[6px]，flex-1，truncate）
                     Text(item.label)
                       .fontSize(10)
                       .fontWeight(item.current ? FontWeightConstant.semibold : FontWeightConstant.regular)
@@ -335,7 +276,6 @@ export struct HistoryPanel {
                   .layoutWeight(1)
                   .alignItems(VerticalAlign.Center)
 
-                  // 重做图标（原型：v-if canRedo，opacity-0 hover:opacity-100）
                   if (item.canRedo) {
                     Text(Icon.redo)
                       .fontSize(7)
@@ -352,20 +292,7 @@ export struct HistoryPanel {
                 .opacity(item.future ? 0.5 : 1)
                 .alignItems(VerticalAlign.Center)
                 .onHover((isHover: boolean) => { this.hoveredItem = isHover ? item.key : '' })
-                .onClick(() => {
-                  this.currentIndex = item.index
-                  this.historyList = this.historyList.map((h: HistoryItem): HistoryItem => {
-                    const item2: HistoryItem = {
-                      key: h.key, label: h.label, icon: h.icon, index: h.index,
-                      current: h.key === item.key, future: h.index > item.index, canRedo: h.index > item.index,
-                      timestamp: h.timestamp,
-                    }
-                    return item2
-                  })
-                  // 同步 undoCount/redoCount
-                  this.undoCount = item.index
-                  this.redoCount = this.historyList.length - item.index
-                })
+                .onClick(() => { this.onItemClick(item) })
               })
             }
             .width('100%')
@@ -374,7 +301,7 @@ export struct HistoryPanel {
           .scrollBar(BarState.Off)
         }
 
-        // ─── 底部统计（原型：仅文字） ───
+        // 底部统计
         Row() {
           Text(`${this.undoCount} 已撤销`)
             .fontSize(9)

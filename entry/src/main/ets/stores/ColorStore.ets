@@ -1,12 +1,12 @@
-/**
- * ColorStore - 颜色状态管理
- *
- * 对应原型 src/stores/color.ts
- */
 export class ColorStore {
   private static instance: ColorStore
   private _currentHex: string = '#3AC487'
-  private _history: string[] = []
+  private _recentColors: string[] = [
+    '#3AC487', '#1F2329', '#FFFFFF', '#F3F4F6', '#E5E7EB', '#9CA3AF',
+  ]
+  private _favoriteColors: string[] = [
+    '#3AC487', '#1F2329', '#FFFFFF', '#EF4444', '#F59E0B', '#3B82F6',
+  ]
 
   private constructor() {}
 
@@ -21,18 +21,52 @@ export class ColorStore {
     return this._currentHex
   }
 
+  get recentColors(): string[] {
+    return this._recentColors
+  }
+
+  get favoriteColors(): string[] {
+    return this._favoriteColors
+  }
+
   get history(): string[] {
-    return this._history
+    return this._recentColors
   }
 
   setColor(hex: string): void {
-    if (hex === this._currentHex) return
-    // 加入历史（去重）
-    const idx = this._history.indexOf(hex)
-    if (idx >= 0) this._history.splice(idx, 1)
-    this._history.unshift(hex)
-    if (this._history.length > 16) this._history.length = 16
-    this._currentHex = hex
-    AppStorage.setOrCreate<string>('currentColor', hex)
+    const normalized = hex.toUpperCase()
+    if (normalized === this._currentHex) return
+    this._recentColors = this._recentColors.filter(c => c.toUpperCase() !== normalized)
+    this._recentColors.unshift(normalized)
+    if (this._recentColors.length > 12) {
+      this._recentColors = this._recentColors.slice(0, 12)
+    }
+    this._currentHex = normalized
+    AppStorage.setOrCreate<string>('currentColor', normalized)
+  }
+
+  addFavorite(hex: string): void {
+    const normalized = hex.toUpperCase()
+    let found = false
+    for (let i = 0; i < this._favoriteColors.length; i++) {
+      if (this._favoriteColors[i].toUpperCase() === normalized) {
+        found = true
+        break
+      }
+    }
+    if (!found) {
+      this._favoriteColors.push(normalized)
+    }
+  }
+
+  removeFavorite(hex: string): void {
+    const normalized = hex.toUpperCase()
+    const result: string[] = []
+    for (let i = 0; i < this._favoriteColors.length; i++) {
+      if (this._favoriteColors[i].toUpperCase() !== normalized) {
+        result.push(this._favoriteColors[i])
+      }
+    }
+    this._favoriteColors = result
   }
 }

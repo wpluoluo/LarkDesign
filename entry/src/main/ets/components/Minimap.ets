@@ -192,11 +192,11 @@ export struct Minimap {
           .height(120)
           .backgroundColor(ColorToken.white)
           // 点击鸟瞰图：平移视口到点击位置（原型 onMinimapClick）
-          .onClick((event: GestureEvent) => {
+          .onClick((event: ClickEvent) => {
             // 简化：点击时将视口中心移到点击位置（模拟）
             if (this.viewportRect) {
-              const offsetX = event.fingerList[0].localX - 90
-              const offsetY = event.fingerList[0].localY - 60
+              const offsetX = event.x - 90
+              const offsetY = event.y - 60
               this.viewportRect = {
                 x: Math.max(0, Math.min(180 - this.viewportRect.w, offsetX + this.viewportRect.w / 2)),
                 y: Math.max(0, Math.min(120 - this.viewportRect.h, offsetY + this.viewportRect.h / 2)),

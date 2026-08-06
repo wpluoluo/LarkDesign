@@ -2,25 +2,40 @@
  * AIAssistant - AI 助手面板
  *
  * 对应原型 src/components/AIAssistant.vue
- * AI 辅助设计对话界面
+ * AI 辅助设计对话界面，连接 AiAgent 后端引擎
  */
 import { ColorToken } from '../tokens/DesignTokens'
 import { FontWeightConstant, FontSizeToken, SpacingToken, RadiusToken, ShadowToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-
-interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-  time: string
-}
+import { AiAgent, ChatMessage } from '../utils/AiAgent'
 
 @Component
 export struct AIAssistant {
+  private aiAgent: AiAgent = new AiAgent()
   @State messages: ChatMessage[] = []
   @State inputText: string = ''
   @State isExpanded: boolean = true
+  @State isThinking: boolean = false
 
-  build(): void {
+  aboutToAppear(): void {
+    this.messages = this.aiAgent.getState().messages
+  }
+
+  private doSend(): void {
+    if (this.inputText.length === 0) return
+    const text = this.inputText
+    this.inputText = ''
+    this.isThinking = true
+    this.aiAgent.send(text).then((msgs: ChatMessage[]) => {
+      this.messages = msgs
+      this.isThinking = false
+    }).catch(() => {
+      this.messages = this.aiAgent.getState().messages
+      this.isThinking = false
+    })
+  }
+
+  build() {
     Column() {
       // 标题栏
       Row() {
@@ -51,7 +66,6 @@ export struct AIAssistant {
         Scroll() {
           Column() {
             if (this.messages.length === 0) {
-              // 空状态
               Column() {
                 Text(Icon.wand)
                   .fontSize(24)
@@ -83,6 +97,15 @@ export struct AIAssistant {
                 .alignItems(msg.role === 'user' ? HorizontalAlign.End : HorizontalAlign.Start)
                 .padding({ left: 12, right: 12, top: 4, bottom: 4 })
               })
+              if (this.isThinking) {
+                Row() {
+                  Text('思考中...')
+                    .fontSize(10)
+                    .fontColor(ColorToken.muted)
+                }
+                .width('100%')
+                .padding({ left: 12, top: 4 })
+              }
             }
           }
           .width('100%')
@@ -115,16 +138,7 @@ export struct AIAssistant {
           .justifyContent(FlexAlign.Center)
           .alignItems(HorizontalAlign.Center)
           .margin({ left: 6 })
-          .onClick(() => {
-            if (this.inputText.length > 0) {
-              this.messages.push({
-                role: 'user',
-                content: this.inputText,
-                time: new Date().toLocaleTimeString()
-              })
-              this.inputText = ''
-            }
-          })
+          .onClick(() => { this.doSend() })
         }
         .width('100%')
         .padding({ left: 12, right: 12, bottom: 10 })
@@ -137,4 +151,3 @@ export struct AIAssistant {
     .border({ width: 1, color: ColorToken.border_light })
   }
 }
-

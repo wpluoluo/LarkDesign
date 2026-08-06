@@ -4,8 +4,8 @@
  * 对应原型 src/fusion/ops.ts
  * 提供 Scene/Layer/Object/Frame 的增删改查。
  */
-import { HdsDocument, Layer, Frame, FrameType, Scene, SceneObject, Page, InfiniteCanvasConfig } from '../types/SceneTypes'
-import { createLayer, createFrame, genId } from '../types/FusionFactory'
+import { HdsDocument, Layer, Frame, FrameType, Scene, SceneObject, Page, Transform, Mask, LayerEffect, InfiniteCanvasConfig } from '../types/SceneTypes'
+import { createLayer, createFrame, createPage, genId, CreateFrameParams } from '../types/FusionFactory'
 
 /** 深克隆 */
 export function deepClone<T>(value: T): T {
@@ -53,7 +53,7 @@ export function addFrame(doc: HdsDocument, type?: string, name?: string, x?: num
     doc.scene.canvas = canvasConfig
   }
   const frameType: FrameType = (type ?? 'single') as FrameType
-  const frame = createFrame(frameType, name, x, y)
+  const frame = createFrame({ type: frameType, name: name, x: x, y: y } as CreateFrameParams)
   if (doc.scene.frames.length > 0 && x === undefined) {
     const last = doc.scene.frames[doc.scene.frames.length - 1]
     frame.x = last.x + last.width + 80
@@ -160,7 +160,7 @@ export function fitViewportToFrames(
 export function addLayer(doc: HdsDocument, name?: string): Layer {
   const arr = getCurrentLayers(doc)
   const layerName = name ?? `图层 ${arr.length + 1}`
-  const newLayer = createLayer(layerName)
+  const newLayer = createLayer({ name: layerName })
   const curPage = getCurrentPage(doc)
   newLayer.parentId = curPage?.id ?? doc.scene.id
   arr.push(newLayer)
@@ -252,4 +252,269 @@ function collectObjects(objects: SceneObject[], result: SceneObject[]): void {
       collectObjects(o.children, result)
     }
   }
+}
+
+/* ════════════════ Layer 扩展操作 ════════════════ */
+
+export function moveLayer(doc: HdsDocument, fromIndex: number, toIndex: number): void {
+  const arr = getCurrentLayers(doc)
+  if (fromIndex < 0 || fromIndex >= arr.length) return
+  if (toIndex < 0 || toIndex >= arr.length) return
+  if (fromIndex === toIndex) return
+  const moved = arr.splice(fromIndex, 1)[0]
+  arr.splice(toIndex, 0, moved)
+}
+
+export function duplicateLayer(doc: HdsDocument, layerId: string): Layer | undefined {
+  const src = findLayerById(doc, layerId)
+  if (!src) return undefined
+  const cloned = deepClone(src)
+  cloned.id = genId('layer')
+  cloned.name = `${src.name} 副本`
+  cloned.objects = cloned.objects.map(o => regenerateObjectIds(o))
+  getCurrentLayers(doc).push(cloned)
+  return cloned
+}
+
+export function findObjectInLayer(layer: Layer, objId: string): SceneObject | undefined {
+  return layer.objects.find(o => o.id === objId)
+}
+
+export function removeObjectFromLayer(doc: HdsDocument, layerId: string, objId: string): boolean {
+  const layer = findLayerById(doc, layerId)
+  if (!layer) return false
+  const idx = layer.objects.findIndex(o => o.id === objId)
+  if (idx < 0) return false
+  layer.objects.splice(idx, 1)
+  return true
+}
+
+export function moveObjectInLayer(doc: HdsDocument, layerId: string, fromIndex: number, toIndex: number): void {
+  const layer = findLayerById(doc, layerId)
+  if (!layer) return
+  const arr = layer.objects
+  if (fromIndex < 0 || fromIndex >= arr.length) return
+  if (toIndex < 0 || toIndex >= arr.length) return
+  if (fromIndex === toIndex) return
+  const moved = arr.splice(fromIndex, 1)[0]
+  arr.splice(toIndex, 0, moved)
+}
+
+/* ════════════════ 编组/解组 ════════════════ */
+
+export function groupObjects(doc: HdsDocument, layerId: string, objIds: string[]): SceneObject | undefined {
+  const layer = findLayerById(doc, layerId)
+  if (!layer || objIds.length < 2) return undefined
+  const objs: SceneObject[] = []
+  const indices: number[] = []
+  for (let i = 0; i < objIds.length; i++) {
+    const idx = layer.objects.findIndex(o => o.id === objIds[i])
+    if (idx >= 0) {
+      objs.push(layer.objects[idx])
+      indices.push(idx)
+    }
+  }
+  if (objs.length < 2) return undefined
+  indices.sort((a, b) => b - a)
+  for (let i = 0; i < indices.length; i++) {
+    layer.objects.splice(indices[i], 1)
+  }
+  const insertAt = Math.min(...indices)
+  const minX = Math.min(...objs.map(o => o.transform.x))
+  const minY = Math.min(...objs.map(o => o.transform.y))
+  const maxX = Math.max(...objs.map(o => o.transform.x + o.transform.width))
+  const maxY = Math.max(...objs.map(o => o.transform.y + o.transform.height))
+  const group: SceneObject = {
+    id: genId('group'),
+    type: 'group',
+    name: `组 ${layer.objects.length + 1}`,
+    transform: {
+      x: minX, y: minY,
+      width: maxX - minX, height: maxY - minY,
+      rotation: 0, scaleX: 1, scaleY: 1, flipH: false, flipV: false, opacity: 100,
+    } as Transform,
+    blendMode: 'pass-through',
+    visible: true,
+    locked: false,
+    children: objs,
+  }
+  layer.objects.splice(insertAt, 0, group)
+  return group
+}
+
+export function ungroupObjects(doc: HdsDocument, layerId: string, groupId: string): boolean {
+  const layer = findLayerById(doc, layerId)
+  if (!layer) return false
+  const idx = layer.objects.findIndex(o => o.id === groupId && o.type === 'group')
+  if (idx < 0) return false
+  const group = layer.objects[idx]
+  const children = group.children ?? []
+  layer.objects.splice(idx, 1, ...children)
+  return true
+}
+
+function regenerateObjectIds(obj: SceneObject): SceneObject {
+  const cloned = deepClone(obj)
+  cloned.id = genId(obj.type)
+  if (cloned.type === 'group' && cloned.children) {
+    cloned.children = cloned.children.map(regenerateObjectIds)
+  }
+  return cloned
+}
+
+/* ════════════════ 蒙版与效果 ════════════════ */
+
+export function addMaskToLayer(doc: HdsDocument, layerId: string, mask: Mask): boolean {
+  const layer = findLayerById(doc, layerId)
+  if (!layer) return false
+  layer.hasMask = true
+  layer.maskEnabled = true
+  layer.mask = mask
+  return true
+}
+
+export function toggleLayerMask(doc: HdsDocument, layerId: string): boolean {
+  const layer = findLayerById(doc, layerId)
+  if (!layer || !layer.hasMask) return false
+  layer.maskEnabled = !layer.maskEnabled
+  return true
+}
+
+export function addLayerEffect(doc: HdsDocument, layerId: string, effect: LayerEffect): boolean {
+  const layer = findLayerById(doc, layerId)
+  if (!layer) return false
+  layer.effects.push(effect)
+  return true
+}
+
+export function removeLayerEffect(doc: HdsDocument, layerId: string, effectId: string): boolean {
+  const layer = findLayerById(doc, layerId)
+  if (!layer) return false
+  const idx = layer.effects.findIndex(e => e.id === effectId)
+  if (idx < 0) return false
+  layer.effects.splice(idx, 1)
+  return true
+}
+
+/* ════════════════ 信息查询 ════════════════ */
+
+export function listAllLayers(doc: HdsDocument): Layer[] {
+  return getCurrentLayers(doc)
+}
+
+export function listAllPages(doc: HdsDocument): Page[] {
+  return doc.scene.pages ?? []
+}
+
+export interface SceneInfo {
+  layerCount: number
+  objectCount: number
+  canvasSize: string
+  pageCount: number
+  currentPage: number
+}
+
+export function getSceneInfo(doc: HdsDocument): SceneInfo {
+  const pages = doc.scene.pages ?? []
+  const curIdx = pages.findIndex(p => p.id === doc.scene.currentPageId)
+  const info: SceneInfo = {
+    layerCount: getCurrentLayers(doc).length,
+    objectCount: listAllObjects(doc).length,
+    canvasSize: `${doc.scene.canvasWidth} × ${doc.scene.canvasHeight} ${doc.scene.unit}`,
+    pageCount: pages.length || 1,
+    currentPage: curIdx >= 0 ? curIdx + 1 : 1,
+  }
+  return info
+}
+
+/* ════════════════ Page 操作 ════════════════ */
+
+export function addPage(doc: HdsDocument, name?: string): Page {
+  if (!doc.scene.pages) doc.scene.pages = []
+  const page: Page = {
+    id: genId('page'),
+    name: name ?? `页面 ${doc.scene.pages.length + 1}`,
+    width: doc.scene.canvasWidth,
+    height: doc.scene.canvasHeight,
+    background: '#FFFFFF',
+    children: [],
+    hidden: false,
+    createdAt: new Date().toISOString(),
+  }
+  doc.scene.pages.push(page)
+  if (!doc.scene.currentPageId) doc.scene.currentPageId = page.id
+  return page
+}
+
+export function duplicatePage(doc: HdsDocument, pageId: string): Page | null {
+  if (!doc.scene.pages) return null
+  const src = doc.scene.pages.find(p => p.id === pageId)
+  if (!src) return null
+  const clonedLayers = deepClone(src.children)
+  for (let i = 0; i < clonedLayers.length; i++) {
+    const l = clonedLayers[i]
+    l.id = genId('layer')
+    l.objects = l.objects.map(o => regenerateObjectIds(o))
+  }
+  const newPage: Page = {
+    id: genId('page'),
+    name: `${src.name} 副本`,
+    width: src.width,
+    height: src.height,
+    background: src.background,
+    children: clonedLayers,
+    hidden: false,
+    createdAt: new Date().toISOString(),
+  }
+  const idx = doc.scene.pages.findIndex(p => p.id === pageId)
+  doc.scene.pages.splice(idx + 1, 0, newPage)
+  return newPage
+}
+
+export function deletePage(doc: HdsDocument, pageId: string): boolean {
+  if (!doc.scene.pages || doc.scene.pages.length <= 1) return false
+  const idx = doc.scene.pages.findIndex(p => p.id === pageId)
+  if (idx < 0) return false
+  doc.scene.pages.splice(idx, 1)
+  if (doc.scene.currentPageId === pageId) {
+    doc.scene.currentPageId = doc.scene.pages[0]?.id ?? ''
+  }
+  return true
+}
+
+export function switchPage(doc: HdsDocument, pageId: string): boolean {
+  if (!doc.scene.pages) return false
+  const exists = doc.scene.pages.find(p => p.id === pageId)
+  if (!exists) return false
+  doc.scene.currentPageId = pageId
+  return true
+}
+
+export function renamePage(doc: HdsDocument, pageId: string, name: string): boolean {
+  if (!doc.scene.pages) return false
+  const page = doc.scene.pages.find(p => p.id === pageId)
+  if (!page) return false
+  page.name = name
+  return true
+}
+
+export function movePage(doc: HdsDocument, pageId: string, newIndex: number): boolean {
+  if (!doc.scene.pages) return false
+  const curIdx = doc.scene.pages.findIndex(p => p.id === pageId)
+  if (curIdx < 0) return false
+  const clamped = Math.max(0, Math.min(doc.scene.pages.length - 1, newIndex))
+  if (clamped === curIdx) return false
+  const page = doc.scene.pages.splice(curIdx, 1)[0]
+  doc.scene.pages.splice(clamped, 0, page)
+  return true
+}
+
+export function addLayerToPage(doc: HdsDocument, pageId: string, layer?: Layer): Layer | null {
+  if (!doc.scene.pages) return null
+  const page = doc.scene.pages.find(p => p.id === pageId)
+  if (!page) return null
+  const l = layer ?? createLayer({ name: `Layer ${page.children.length + 1}` })
+  l.parentId = page.id
+  page.children.push(l)
+  return l
 }

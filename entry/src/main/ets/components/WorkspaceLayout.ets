@@ -20,6 +20,7 @@ import { DocumentToolbar } from './DocumentToolbar'
 import { ColorSystem } from './ColorSystem'
 import { ComponentLibrary } from './ComponentLibrary'
 import { AIAssistant } from './AIAssistant'
+import { CanvasExportPanel } from './CanvasExportPanel'
 import { IconCharToken as Icon } from '../tokens/IconToken'
 
 /** 参考线 */
@@ -50,6 +51,7 @@ export struct WorkspaceLayout {
   @StorageLink('showColorSystem') showColorSystem: boolean = false
   @StorageLink('showComponentLibrary') showComponentLibrary: boolean = false
   @StorageLink('showAIAssistant') showAIAssistant: boolean = false
+  @StorageLink('showCanvasExport') showCanvasExport: boolean = false
 
   // 标尺刻度数据（动态生成）
   private get hMarksGen(): Array<RulerMark> {
@@ -368,6 +370,15 @@ export struct WorkspaceLayout {
                 .position({ x: '100%', y: '100%' })
                 .markAnchor({ x: '100%', y: '100%' })
                 .offset({ x: -20, y: -20 })
+                .zIndex(30)
+            }
+
+            // 导出预览面板（右下角浮动）
+            if (this.showCanvasExport) {
+              CanvasExportPanel()
+                .position({ x: '100%', y: '100%' })
+                .markAnchor({ x: '100%', y: '100%' })
+                .offset({ x: -300, y: -460 })
                 .zIndex(30)
             }
 

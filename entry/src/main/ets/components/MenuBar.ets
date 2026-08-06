@@ -8,6 +8,7 @@ import { ColorToken } from '../tokens/DesignTokens'
 import { LayoutToken, FontSizeToken, SpacingToken, RadiusToken, FontWeightConstant, ShadowToken, ZIndexToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
 import { MENU_ITEMS, MenuBarItem, SubMenuItem } from '../data/MenuItems'
+import { ActionDispatcher } from '../utils/ActionDispatcher'
 
 @Component
 export struct MenuBar {
@@ -51,23 +52,26 @@ export struct MenuBar {
 
   /** 菜单项点击 */
   private onMenuItemClick(label: string): void {
-    if (label === '新建') this.showToast('新建文档', Icon.file_new, 'info')
-    else if (label === '保存') this.showToast('文档已保存', Icon.save, 'success')
-    else if (label === '导出') this.showToast('导出中...', Icon.export, 'info')
-    else if (label === '撤销') this.showToast('已撤销', Icon.undo, 'info')
-    else if (label === '重做') this.showToast('已重做', Icon.redo, 'info')
-    else if (label === '编组') this.showToast('已编组', Icon.group, 'success')
-    else if (label === '解组') this.showToast('已解组', Icon.ungroup, 'success')
-    else if (label === '隐藏面板') {
-      this.showPagesPanel = !this.showPagesPanel
-      this.showInspector = !this.showInspector
-      this.showToast(this.showPagesPanel ? '面板已显示' : '面板已隐藏', Icon.eye, 'info')
+    const dispatcher = ActionDispatcher.getInstance()
+    const menuActionMap: Record<string, string> = {
+      '新建': 'newDocument',
+      '保存': 'save',
+      '导出': 'export',
+      '撤销': 'undo',
+      '重做': 'redo',
+      '编组': 'group',
+      '解组': 'ungroup',
+      '隐藏面板': 'togglePanels',
+      '历史记录': 'toggleHistory',
     }
-    else if (label === '历史记录') {
-      this.showHistoryPanel = !this.showHistoryPanel
-      this.showToast(this.showHistoryPanel ? '历史记录已显示' : '历史记录已隐藏', Icon.history, 'info')
+    const action = menuActionMap[label]
+    if (action === 'togglePanels' || action === 'toggleHistory') {
+      dispatcher.handleAction(action)
+    } else if (action) {
+      dispatcher.handleAction(action)
+    } else {
+      this.showToast(label, Icon.info, 'info')
     }
-    else this.showToast(label, Icon.info, 'info')
     this.activeMenu = ''
     this.openSubMenu = ''
     this.openSubSubMenu = ''
@@ -303,16 +307,16 @@ export struct MenuBar {
           .alignItems(VerticalAlign.Center)
           .opacity(item.disabled ? 0.4 : 1)
           .onHover((isHover: boolean) => {
-            this.hoveredItem = isHover ? item.label : ''
+            this.hoveredItem = isHover ? (item.label ?? '') : ''
             // 悬停时自动打开子菜单
             if (isHover && this.hasChildren(item)) {
-              this.openSubMenu = item.label
+              this.openSubMenu = item.label ?? ''
               this.openSubSubMenu = ''
             }
           })
           .onClick(() => {
             if (!item.disabled && !this.hasChildren(item)) {
-              this.onMenuItemClick(item.label)
+              this.onMenuItemClick(item.label ?? '')
             }
           })
 

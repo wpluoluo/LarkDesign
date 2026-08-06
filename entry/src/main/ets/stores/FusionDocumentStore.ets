@@ -4,8 +4,8 @@
  * 对应原型 src/stores/fusionDocument.ts
  * 使用 AppStorage 实现全局响应式，配合 @StorageLink 在组件中订阅。
  */
-import { HdsDocument, Scene, Layer, Frame, SceneObject, Transform } from '../types/SceneTypes'
-import { createScene } from '../types/FusionFactory'
+import { HdsDocument, Scene, Layer, Frame, SceneObject, Transform, LayerEffect, BlendMode } from '../types/SceneTypes'
+import { createScene, createLayer, genId } from '../types/FusionFactory'
 import {
   getCurrentFrame, getCurrentLayers, getCurrentPage,
   addFrame, removeFrame, duplicateFrame, findFrameById, updateFrame,
@@ -15,6 +15,17 @@ import {
 } from '../types/FusionOps'
 import { FusionDocumentStoreInfo } from './FusionDocumentStoreInfo'
 import { serialize, deserialize, deepClone, estimateSize } from '../types/FusionSerializer'
+
+/** 历史记录条目 */
+export interface HistoryEntry {
+  key: string
+  label: string
+  icon: string
+  index: number
+  current: boolean
+  future: boolean
+  canRedo: boolean
+}
 
 export class FusionDocumentStore {
   private static instance: FusionDocumentStore
@@ -52,6 +63,8 @@ export class FusionDocumentStore {
 
   /** 初始化 */
   init(): void {
+    AppStorage.setOrCreate<number>('historyVersion', 0)
+    AppStorage.setOrCreate<number>('selectionVersion', 0)
     this.loadFromStorage()
     this.pushHistory()
   }
@@ -145,6 +158,7 @@ export class FusionDocumentStore {
   switchFrame(frameId: string): void {
     this.doc.scene.selectedFrameId = frameId
     this.selectedObjectIds = []
+    AppStorage.setOrCreate<number>('selectionVersion', Date.now())
   }
 
   duplicateCurrentFrame(): Frame | null {
@@ -184,9 +198,15 @@ export class FusionDocumentStore {
     this.pushHistory()
   }
 
+  selectAllObjects(): void {
+    const all = listAllObjects(this.doc)
+    this.selectedObjectIds = all.map(o => o.id)
+  }
+
   selectObject(objId: string | null, additive?: boolean): void {
     if (objId === null) {
       this.selectedObjectIds = []
+      AppStorage.setOrCreate<number>('selectionVersion', Date.now())
       return
     }
     if (additive) {
@@ -199,11 +219,37 @@ export class FusionDocumentStore {
     } else {
       this.selectedObjectIds = [objId]
     }
+    AppStorage.setOrCreate<number>('selectionVersion', Date.now())
   }
 
   moveObject(objId: string, x: number, y: number, skipHistory?: boolean): void {
     updateObjectTransform(this.doc, objId, x, y)
     if (!skipHistory) this.pushHistory()
+  }
+
+  updateObjectTransform(objId: string, x?: number, y?: number, width?: number, height?: number, rotation?: number, scaleX?: number, scaleY?: number): void {
+    updateObjectTransform(this.doc, objId, x, y, width, height, rotation)
+    const found = findObjectInDoc(this.doc, objId)
+    if (found) {
+      if (scaleX !== undefined) found.obj.transform.scaleX = scaleX
+      if (scaleY !== undefined) found.obj.transform.scaleY = scaleY
+    }
+    this.pushHistory('变换对象')
+  }
+
+  updateObjectAppearance(objId: string, key: string, value: number | string | boolean): void {
+    const found = findObjectInDoc(this.doc, objId)
+    if (!found) return
+    if (key === 'fill') found.obj.fill = value as string
+    else if (key === 'stroke') found.obj.stroke = value as string
+    else if (key === 'strokeWidth') found.obj.strokeWidth = value as number
+    else if (key === 'cornerRadius') found.obj.cornerRadius = value as number
+    else if (key === 'opacity') found.obj.transform.opacity = value as number
+    else if (key === 'flipH') found.obj.transform.flipH = value as boolean
+    else if (key === 'flipV') found.obj.transform.flipV = value as boolean
+    else if (key === 'blendMode') found.obj.blendMode = value as BlendMode
+    else if (key === 'strokePosition') found.obj.strokePosition = value as string
+    this.pushHistory('修改外观')
   }
 
   removeObjectById(objId: string): void {
@@ -248,20 +294,140 @@ export class FusionDocumentStore {
     this.pushHistory()
   }
 
+  /* ════════════════ 锁定/隐藏/编组/图层顺序 ════════════════ */
+
+  toggleObjectLock(objId: string): void {
+    const found = findObjectInDoc(this.doc, objId)
+    if (found) {
+      found.obj.locked = !found.obj.locked
+      this.pushHistory()
+    }
+  }
+
+  toggleObjectVisible(objId: string): void {
+    const found = findObjectInDoc(this.doc, objId)
+    if (found) {
+      found.obj.visible = !found.obj.visible
+      this.pushHistory()
+    }
+  }
+
+  groupObjects(objIds: string[]): void {
+    if (objIds.length < 2) return
+    const layers = getCurrentLayers(this.doc)
+    for (const layer of layers) {
+      const groupObjects: SceneObject[] = []
+      const remaining: SceneObject[] = []
+      for (const obj of layer.objects) {
+        if (objIds.includes(obj.id)) {
+          groupObjects.push(obj)
+        } else {
+          remaining.push(obj)
+        }
+      }
+      if (groupObjects.length >= 2) {
+        const groupObj: SceneObject = {
+          id: genId('group'),
+          type: 'group',
+          name: '编组',
+          transform: {
+            x: 0, y: 0, width: 0, height: 0, rotation: 0,
+            scaleX: 1, scaleY: 1, flipH: false, flipV: false, opacity: 100,
+          },
+          blendMode: 'normal',
+          visible: true,
+          locked: false,
+          children: groupObjects,
+        }
+        remaining.push(groupObj)
+        layer.objects = remaining
+        this.selectedObjectIds = [groupObj.id]
+        this.pushHistory('编组对象')
+        return
+      }
+    }
+  }
+
+  ungroupObjects(groupId: string): void {
+    const layers = getCurrentLayers(this.doc)
+    for (const layer of layers) {
+      const idx = layer.objects.findIndex(o => o.id === groupId)
+      if (idx >= 0 && layer.objects[idx].type === 'group' && layer.objects[idx].children) {
+        const group = layer.objects[idx]
+        const children = group.children ?? []
+        layer.objects.splice(idx, 1, ...children)
+        this.selectedObjectIds = children.map(c => c.id)
+        this.pushHistory('解组对象')
+        return
+      }
+    }
+  }
+
+  private moveObjectInLayer(objId: string, targetIndex: number): void {
+    const layers = getCurrentLayers(this.doc)
+    for (const layer of layers) {
+      const idx = layer.objects.findIndex(o => o.id === objId)
+      if (idx >= 0) {
+        const obj = layer.objects.splice(idx, 1)[0]
+        const clamped = Math.max(0, Math.min(targetIndex, layer.objects.length))
+        layer.objects.splice(clamped, 0, obj)
+        this.pushHistory('调整图层顺序')
+        return
+      }
+    }
+  }
+
+  bringToFront(objId: string): void {
+    this.moveObjectInLayer(objId, Infinity)
+  }
+
+  bringForward(objId: string): void {
+    const layers = getCurrentLayers(this.doc)
+    for (const layer of layers) {
+      const idx = layer.objects.findIndex(o => o.id === objId)
+      if (idx >= 0) {
+        this.moveObjectInLayer(objId, idx + 1)
+        return
+      }
+    }
+  }
+
+  sendBackward(objId: string): void {
+    const layers = getCurrentLayers(this.doc)
+    for (const layer of layers) {
+      const idx = layer.objects.findIndex(o => o.id === objId)
+      if (idx >= 0) {
+        this.moveObjectInLayer(objId, idx - 1)
+        return
+      }
+    }
+  }
+
+  sendToBack(objId: string): void {
+    this.moveObjectInLayer(objId, 0)
+  }
+
   /* ════════════════ 历史记录 ════════════════ */
 
-  private pushHistory(label?: string): void {
+  private notifyHistoryChange(): void {
+    AppStorage.setOrCreate<number>('historyVersion', Date.now())
+  }
+
+  pushHistory(label?: string): void {
     this.scheduleAutoSave()
+    this.historyStack = this.historyStack.slice(0, this.historyIndex + 1)
+    this.historyLabels = this.historyLabels.slice(0, this.historyIndex + 1)
     this.historyLabels.push(label ?? 'action')
     const snapshot = JSON.stringify(this.doc)
-    this.historyStack = this.historyStack.slice(0, this.historyIndex + 1)
     this.historyStack.push(snapshot)
     if (this.historyStack.length > 50) {
       this.historyStack.shift()
+      this.historyLabels.shift()
     } else {
       this.historyIndex++
     }
     this.doc.metadata.modifiedAt = new Date().toISOString()
+    this.notifyHistoryChange()
   }
 
   getHistoryUndoCount(): number {
@@ -286,6 +452,7 @@ export class FusionDocumentStore {
     const snapshot = this.historyStack[this.historyIndex]
     this.doc = JSON.parse(snapshot) as object as HdsDocument
     this.selectedObjectIds = []
+    this.notifyHistoryChange()
   }
 
   redo(): void {
@@ -294,6 +461,83 @@ export class FusionDocumentStore {
     const snapshot = this.historyStack[this.historyIndex]
     this.doc = JSON.parse(snapshot) as object as HdsDocument
     this.selectedObjectIds = []
+    this.notifyHistoryChange()
+  }
+
+  /** 构建历史条目列表（undo 从新到旧 + redo 从旧到新） */
+  getHistoryEntries(): HistoryEntry[] {
+    const entries: HistoryEntry[] = []
+    const undoLen = this.historyIndex + 1
+    for (let i = undoLen - 1; i >= 0; i--) {
+      entries.push({
+        key: `u-${i}`,
+        label: this.historyLabels[i] ?? 'action',
+        icon: this.describeToIcon(this.historyLabels[i] ?? ''),
+        index: i,
+        current: i === this.historyIndex,
+        future: false,
+        canRedo: false,
+      })
+    }
+    for (let i = this.historyIndex + 1; i < this.historyStack.length; i++) {
+      entries.push({
+        key: `r-${i}`,
+        label: this.historyLabels[i] ?? 'action',
+        icon: this.describeToIcon(this.historyLabels[i] ?? ''),
+        index: i,
+        current: false,
+        future: true,
+        canRedo: true,
+      })
+    }
+    return entries
+  }
+
+  /** 撤销进度百分比（0-100） */
+  getHistoryUndoProgress(): number {
+    const total = this.historyStack.length
+    if (total <= 1) return 100
+    return (this.historyIndex + 1) / total * 100
+  }
+
+  /** 跳转到指定历史索引 */
+  jumpToHistory(index: number): void {
+    if (index < 0 || index >= this.historyStack.length) return
+    if (index === this.historyIndex) return
+    if (index > this.historyIndex) {
+      while (this.historyIndex < index && this.canRedo()) {
+        this.redo()
+      }
+    } else {
+      while (this.historyIndex > index && this.canUndo()) {
+        this.undo()
+      }
+    }
+    this.notifyHistoryChange()
+  }
+
+  /** 根据描述推断图标 */
+  private describeToIcon(desc: string): string {
+    if (desc.includes('新增') || desc.includes('创建') || desc.includes('新建')) return 'p'
+    if (desc.includes('删除') || desc.includes('移除')) return 't'
+    if (desc.includes('移动') || desc.includes('调整') || desc.includes('变换')) return 'c'
+    if (desc.includes('编组') || desc.includes('组')) return 'g'
+    if (desc.includes('图层')) return 'l'
+    if (desc.includes('文字') || desc.includes('文本')) return 'T'
+    if (desc.includes('形状') || desc.includes('矩形') || desc.includes('椭圆')) return 'r'
+    if (desc.includes('图片') || desc.includes('图像')) return 'i'
+    if (desc.includes('蒙版')) return 'p'
+    if (desc.includes('效果') || desc.includes('投影') || desc.includes('阴影')) return 'w'
+    if (desc.includes('混合')) return 'p'
+    if (desc.includes('保存')) return 's'
+    if (desc.includes('重命名')) return 'n'
+    if (desc.includes('锁定')) return 'L'
+    if (desc.includes('隐藏') || desc.includes('显示')) return 'e'
+    if (desc.includes('复制') || desc.includes('克隆')) return 'c'
+    if (desc.includes('翻转')) return 'f'
+    if (desc.includes('旋转')) return 'r'
+    if (desc.includes('快照')) return 'S'
+    return 'h'
   }
 
   /* ════════════════ 剪贴板 ════════════════ */
@@ -335,6 +579,58 @@ export class FusionDocumentStore {
     if (layer) {
       layer.objects.push(obj)
     }
+  }
+
+  /* ════════════════ 效果/蒙版/文本样式 ════════════════ */
+
+  addLayerEffect(layerId: string, effectType: string): void {
+    const layer = findLayerById(this.doc, layerId)
+    if (!layer) return
+    const newEffect: LayerEffect = {
+      id: `${effectType}_${Date.now().toString(36)}`,
+      type: effectType,
+      enabled: true,
+      params: {
+        color: '#000000',
+        opacity: 40,
+        blur: 4,
+        distance: 5,
+        angle: 120,
+      },
+    }
+    layer.effects.push(newEffect)
+    this.pushHistory('添加效果')
+  }
+
+  toggleLayerEffect(layerId: string, effectId: string): void {
+    const layer = findLayerById(this.doc, layerId)
+    if (!layer) return
+    const effect = layer.effects.find(e => e.id === effectId)
+    if (effect) {
+      effect.enabled = !effect.enabled
+      this.pushHistory('切换效果')
+    }
+  }
+
+  removeLayerEffect(layerId: string, effectId: string): void {
+    const layer = findLayerById(this.doc, layerId)
+    if (!layer) return
+    layer.effects = layer.effects.filter(e => e.id !== effectId)
+    this.pushHistory('删除效果')
+  }
+
+  updateObjectTextProp(objId: string, key: string, value: number | string | boolean): void {
+    const found = findObjectInDoc(this.doc, objId)
+    if (!found || found.obj.type !== 'text') return
+    if (key === 'fontSize') found.obj.fontSize = value as number
+    else if (key === 'fontWeight') found.obj.fontWeight = value as number
+    else if (key === 'fontFamily') found.obj.fontFamily = value as string
+    else if (key === 'color') found.obj.color = value as string
+    else if (key === 'text') found.obj.text = value as string
+    else if (key === 'align') found.obj.align = value as string
+    else if (key === 'lineHeight') found.obj.lineHeight = value as number
+    else if (key === 'letterSpacing') found.obj.letterSpacing = value as number
+    this.pushHistory('编辑文本样式')
   }
 
   /* ════════════════ 文档action ════════════════ */

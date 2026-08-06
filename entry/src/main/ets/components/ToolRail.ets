@@ -264,10 +264,8 @@ export struct ToolRail {
           })
       )
       // 右键立即展开（仅多工具组）
-      .bindContextMenu({
-        builder: () => {
-          this.showFlyout(tool.id, 0)
-        },
+      .bindContextMenu((): void => {
+        this.showFlyout(tool.id, 0)
       }, ResponseType.LongPress)
 
       // 多工具指示器（原型：CSS triangle rotate-[-45deg]，位于 bottom-2 right-2）
