@@ -38,121 +38,138 @@ export struct InspectorAppearancePanel {
   @Link hoveredAppearanceRow: string
   @Link hoveredBlendMode: boolean
   @Prop onOpenColorPicker: (target: string, currentColor: string, currentOpacity: number) => void = () => {}
+  @Prop hasFill: boolean = false
+  @Prop hasTextColor: boolean = false
+  @Prop hasStroke: boolean = false
+  @Prop hasCornerRadius: boolean = false
+  @Link textColorValue: string
 
   private fusionStore: FusionDocumentStore = FusionDocumentStore.getInstance()
 
   build(): void {
     Column() {
-      Row() {
+      if (this.hasFill || this.hasTextColor) {
         Row() {
-          Column()
-            .width(24)
-            .height(24)
-            .borderRadius(5)
-            .backgroundColor(this.fillColor)
-            .border({ width: 1, color: ColorToken.border })
-            .shadow(ShadowToken.sm)
-            .onClick(() => { this.onOpenColorPicker('fill', this.fillColor, this.opacityValue) })
-          Text('\u586b\u5145')
-            .fontSize(12)
-            .fontWeight(FontWeightConstant.medium)
-            .fontColor(ColorToken.secondary)
-            .margin({ left: 8 })
-        }
-        .alignItems(VerticalAlign.Center)
+          Row() {
+            Column()
+              .width(24)
+              .height(24)
+              .borderRadius(5)
+              .backgroundColor(this.hasFill ? this.fillColor : this.textColorValue)
+              .border({ width: 1, color: ColorToken.border })
+              .shadow(ShadowToken.sm)
+              .onClick(() => {
+                if (this.hasFill) {
+                  this.onOpenColorPicker('fill', this.fillColor, this.opacityValue)
+                } else {
+                  this.onOpenColorPicker('text', this.textColorValue, this.opacityValue)
+                }
+              })
+            Text(this.hasFill ? '\u586b\u5145' : '\u6587\u5b57\u8272')
+              .fontSize(12)
+              .fontWeight(FontWeightConstant.medium)
+              .fontColor(ColorToken.secondary)
+              .margin({ left: 8 })
+          }
+          .alignItems(VerticalAlign.Center)
 
-        Blank()
-        Text(this.fillColor.toUpperCase())
-          .fontSize(11)
-          .fontWeight(FontWeightConstant.medium)
-          .fontColor(ColorToken.body)
-      }
-      .width('100%')
-      .alignItems(VerticalAlign.Center)
-      .margin({ bottom: 8 })
-
-      Row() {
-        Row() {
-          Column()
-            .width(24)
-            .height(24)
-            .borderRadius(5)
-            .backgroundColor(this.strokeColor)
-            .border({ width: 1, color: ColorToken.border })
-            .shadow(ShadowToken.sm)
-            .onClick(() => { this.onOpenColorPicker('stroke', this.strokeColor, this.opacityValue) })
-          Text('\u63cf\u8fb9')
-            .fontSize(12)
-            .fontWeight(FontWeightConstant.medium)
-            .fontColor(ColorToken.secondary)
-            .margin({ left: 8 })
-        }
-        .alignItems(VerticalAlign.Center)
-
-        Blank()
-        Row() {
-          TextInput({ text: '' + this.strokeWidth })
+          Blank()
+          Text(this.hasFill ? this.fillColor.toUpperCase() : this.textColorValue.toUpperCase())
             .fontSize(11)
             .fontWeight(FontWeightConstant.medium)
             .fontColor(ColorToken.body)
-            .width(52)
-            .height(28)
-            .padding({ left: 8, right: 8 })
-            .borderRadius(4)
-            .backgroundColor(ColorToken.panel)
-            .border({ width: 1, color: ColorToken.border })
-            .textAlign(TextAlign.End)
-            .type(InputType.Number)
-            .onChange((val: string) => { const v = Number(val) || 0; this.strokeWidth = v; this.updateAppearance('strokeWidth', v) })
-          Text('px')
-            .fontSize(10)
-            .fontColor(ColorToken.muted)
-            .margin({ left: 4 })
         }
+        .width('100%')
         .alignItems(VerticalAlign.Center)
+        .margin({ bottom: 8 })
       }
-      .width('100%')
-      .alignItems(VerticalAlign.Center)
-      .margin({ bottom: 8 })
 
-      Row() {
-        this.strokePositionOp('outside', '\u5916\u90e8')
-        this.strokePositionOp('center', '\u5c45\u4e2d')
-        this.strokePositionOp('inside', '\u5185\u90e8')
-      }
-      .width('100%')
-      .margin({ bottom: 10 })
-
-      Row() {
-        Text('\u5706\u89d2\u534a\u5f84')
-          .fontSize(12)
-          .fontWeight(FontWeightConstant.medium)
-          .fontColor(ColorToken.secondary)
-        Blank()
+      if (this.hasStroke) {
         Row() {
-          TextInput({ text: '' + this.cornerRadius })
-            .fontSize(11)
-            .fontWeight(FontWeightConstant.medium)
-            .fontColor(ColorToken.body)
-            .width(52)
-            .height(28)
-            .padding({ left: 8, right: 8 })
-            .borderRadius(4)
-            .backgroundColor(ColorToken.panel)
-            .border({ width: 1, color: ColorToken.border })
-            .textAlign(TextAlign.End)
-            .type(InputType.Number)
-            .onChange((val: string) => { const v = Number(val) || 0; this.cornerRadius = v; this.updateAppearance('cornerRadius', v) })
-          Text('px')
-            .fontSize(10)
-            .fontColor(ColorToken.muted)
-            .margin({ left: 4 })
+          Row() {
+            Column()
+              .width(24)
+              .height(24)
+              .borderRadius(5)
+              .backgroundColor(this.strokeColor)
+              .border({ width: 1, color: ColorToken.border })
+              .shadow(ShadowToken.sm)
+              .onClick(() => { this.onOpenColorPicker('stroke', this.strokeColor, this.opacityValue) })
+            Text('\u63cf\u8fb9')
+              .fontSize(12)
+              .fontWeight(FontWeightConstant.medium)
+              .fontColor(ColorToken.secondary)
+              .margin({ left: 8 })
+          }
+          .alignItems(VerticalAlign.Center)
+
+          Blank()
+          Row() {
+            TextInput({ text: '' + this.strokeWidth })
+              .fontSize(11)
+              .fontWeight(FontWeightConstant.medium)
+              .fontColor(ColorToken.body)
+              .width(52)
+              .height(28)
+              .padding({ left: 8, right: 8 })
+              .borderRadius(4)
+              .backgroundColor(ColorToken.panel)
+              .border({ width: 1, color: ColorToken.border })
+              .textAlign(TextAlign.End)
+              .type(InputType.Number)
+              .onChange((val: string) => { const v = Number(val) || 0; this.strokeWidth = v; this.updateAppearance('strokeWidth', v) })
+            Text('px')
+              .fontSize(10)
+              .fontColor(ColorToken.muted)
+              .margin({ left: 4 })
+          }
+          .alignItems(VerticalAlign.Center)
         }
+        .width('100%')
         .alignItems(VerticalAlign.Center)
+        .margin({ bottom: 8 })
+
+        Row() {
+          this.strokePositionOp('outside', '\u5916\u90e8')
+          this.strokePositionOp('center', '\u5c45\u4e2d')
+          this.strokePositionOp('inside', '\u5185\u90e8')
+        }
+        .width('100%')
+        .margin({ bottom: 10 })
       }
-      .width('100%')
-      .alignItems(VerticalAlign.Center)
-      .margin({ bottom: 8 })
+
+      if (this.hasCornerRadius) {
+        Row() {
+          Text('\u5706\u89d2\u534a\u5f84')
+            .fontSize(12)
+            .fontWeight(FontWeightConstant.medium)
+            .fontColor(ColorToken.secondary)
+          Blank()
+          Row() {
+            TextInput({ text: '' + this.cornerRadius })
+              .fontSize(11)
+              .fontWeight(FontWeightConstant.medium)
+              .fontColor(ColorToken.body)
+              .width(52)
+              .height(28)
+              .padding({ left: 8, right: 8 })
+              .borderRadius(4)
+              .backgroundColor(ColorToken.panel)
+              .border({ width: 1, color: ColorToken.border })
+              .textAlign(TextAlign.End)
+              .type(InputType.Number)
+              .onChange((val: string) => { const v = Number(val) || 0; this.cornerRadius = v; this.updateAppearance('cornerRadius', v) })
+            Text('px')
+              .fontSize(10)
+              .fontColor(ColorToken.muted)
+              .margin({ left: 4 })
+          }
+          .alignItems(VerticalAlign.Center)
+        }
+        .width('100%')
+        .alignItems(VerticalAlign.Center)
+        .margin({ bottom: 8 })
+      }
 
       Row() {
         Text('\u4e0d\u900f\u660e\u5ea6')

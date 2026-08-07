@@ -11,6 +11,10 @@ import { FusionDocumentStore } from '../stores/FusionDocumentStore'
 import { findObjectInDoc } from '../types/FusionOps'
 import { LayerEffect } from '../types/SceneTypes'
 import { InspectorAppearancePanel } from './InspectorAppearancePanel'
+import { InspectorPagePropsPanel } from './InspectorPagePropsPanel'
+import { InspectorColorManagePanel } from './InspectorColorManagePanel'
+import { InspectorCanvasPanel } from './InspectorCanvasPanel'
+import { InspectorLayersPanel } from './InspectorLayersPanel'
 
 interface FxItem {
   id: string
@@ -81,8 +85,14 @@ export struct InspectorDesignTab {
   @State hoveredFontWeight: string = ''
   @State textFontFamily: string = 'HarmonyOS Sans SC'
   @State activeTypeStyle: string = ''
+  @State hasFill: boolean = false
+  @State hasTextColor: boolean = false
+  @State hasStroke: boolean = false
+  @State hasCornerRadius: boolean = false
+  @State showFontMenu: boolean = false
 
   private fusionStore: FusionDocumentStore = FusionDocumentStore.getInstance()
+  private fontOptions: string[] = ['HarmonyOS Sans SC', 'HarmonyOS Sans', 'PingFang SC', 'Microsoft YaHei', 'SimSun', 'SimHei', 'KaiTi', 'FangSong', 'Arial', 'Helvetica', 'Georgia', 'Times New Roman']
 
   aboutToAppear(): void {
     this.syncSelection()
@@ -126,6 +136,10 @@ export struct InspectorDesignTab {
       this.flipV = obj.transform.flipV ?? false
       this.currentBlendMode = obj.blendMode ?? 'normal'
       this.strokePosition = obj.strokePosition ?? 'center'
+      this.hasFill = obj.type === 'shape' || obj.type === 'fill'
+      this.hasTextColor = obj.type === 'text'
+      this.hasStroke = obj.type === 'shape'
+      this.hasCornerRadius = obj.type === 'shape' && obj.shape === 'rectangle'
       if (obj.type === 'text') {
         this.textContent = obj.text ?? ''
         this.textFontSize = obj.fontSize ?? 14
@@ -205,6 +219,10 @@ export struct InspectorDesignTab {
           this.section('appearance', '\u5916\u89c2')
           this.section('typography', '\u6587\u5b57')
           this.section('pathfinder', '\u8def\u5f84\u67e5\u627e\u5668')
+          InspectorPagePropsPanel({})
+          InspectorColorManagePanel({})
+          InspectorCanvasPanel({})
+          InspectorLayersPanel({})
         }
         .width('100%')
       }
@@ -255,6 +273,11 @@ export struct InspectorDesignTab {
             fxList: $fxList,
             hoveredAppearanceRow: $hoveredAppearanceRow,
             hoveredBlendMode: $hoveredBlendMode,
+            hasFill: this.hasFill,
+            hasTextColor: this.hasTextColor,
+            hasStroke: this.hasStroke,
+            hasCornerRadius: this.hasCornerRadius,
+            textColorValue: $textColor,
             onOpenColorPicker: this.onOpenColorPicker,
           })
         } else if (id === 'layout') {
@@ -313,6 +336,11 @@ export struct InspectorDesignTab {
             fxList: $fxList,
             hoveredAppearanceRow: $hoveredAppearanceRow,
             hoveredBlendMode: $hoveredBlendMode,
+            hasFill: this.hasFill,
+            hasTextColor: this.hasTextColor,
+            hasStroke: this.hasStroke,
+            hasCornerRadius: this.hasCornerRadius,
+            textColorValue: $textColor,
             onOpenColorPicker: this.onOpenColorPicker,
           })
         } else if (id === 'layout') {
@@ -1054,6 +1082,29 @@ export struct InspectorDesignTab {
   typographyContent(): void {
     
     Column() {
+      // ─── 内容输入框 ───
+      Column() {
+        Text('\u5185\u5bb9')
+          .fontSize(9)
+          .fontWeight(FontWeightConstant.semibold)
+          .fontColor(ColorToken.muted)
+        TextInput({ text: this.textContent, placeholder: '\u8f93\u5165\u6587\u5b57\u5185\u5bb9...' })
+          .fontSize(12)
+          .fontWeight(FontWeightConstant.medium)
+          .fontColor(ColorToken.body)
+          .backgroundColor(Color.Transparent)
+          .border({ width: 0 })
+          .height(24)
+          .onChange((val: string) => { this.textContent = val; this.updateTextProp('text', val) })
+      }
+      .width('100%')
+      .padding({ left: 6, right: 6, top: 4, bottom: 4 })
+      .borderRadius(5)
+      .backgroundColor(ColorToken.panel)
+      .margin({ bottom: 8 })
+      .alignItems(HorizontalAlign.Start)
+
+      // ─── 字体行（点击显示下拉） ───
       Row() {
         Text('\u5b57\u4f53')
           .fontSize(10)
@@ -1076,6 +1127,31 @@ export struct InspectorDesignTab {
       .alignItems(VerticalAlign.Center)
       .margin({ bottom: 8 })
       .onHover((isHover: boolean) => { this.hoveredFrameRow = isHover ? 'font_family' : '' })
+      .onClick(() => { this.showFontMenu = !this.showFontMenu })
+
+      if (this.showFontMenu) {
+        Column() {
+          ForEach(this.fontOptions, (font: string) => {
+            Text(font)
+              .fontSize(12)
+              .fontWeight(FontWeightConstant.medium)
+              .fontColor(this.textFontFamily === font ? ColorToken.primary_dark_700 : ColorToken.body)
+              .width('100%')
+              .height(28)
+              .padding({ left: 12 })
+              .backgroundColor(this.hoveredFrameRow === 'font_' + font ? ColorToken.hover_bg : Color.Transparent)
+              .onClick(() => { this.textFontFamily = font; this.updateTextProp('fontFamily', font); this.showFontMenu = false })
+              .onHover((isHover: boolean) => { this.hoveredFrameRow = isHover ? 'font_' + font : '' })
+          })
+        }
+        .width('100%')
+        .backgroundColor(ColorToken.white)
+        .border({ width: 1, color: ColorToken.border })
+        .borderRadius(6)
+        .shadow({ radius: 8, color: '#0000001F', offsetX: 0, offsetY: 4 })
+        .padding({ top: 4, bottom: 4 })
+        .margin({ bottom: 8 })
+      }
 
       Row() {
         Column() {

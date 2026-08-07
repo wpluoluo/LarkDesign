@@ -13,6 +13,7 @@ import { InspectorDesignTab } from './InspectorDesignTab'
 import { InspectorExportTab } from './InspectorExportTab'
 import { InspectorSettingsTab } from './InspectorSettingsTab'
 import { InspectorAiTab } from './InspectorAiTab'
+import { WindowSettingsDialog } from './WindowSettingsDialog'
 
 @Component
 export struct Inspector {
@@ -26,6 +27,8 @@ export struct Inspector {
   @State colorPickerValue: string = '#3AC487'
   @State colorPickerOpacity: number = 100
   @State colorPickerVersion: number = 0
+  @State showWindowSettings: boolean = false
+  @State hoveredGear: boolean = false
 
   private colorPickerX: number = 8
   private colorPickerY: number = 80
@@ -43,17 +46,17 @@ export struct Inspector {
           Column() {
             Text(Icon.gear)
               .fontSize(12)
-              .fontColor(this.hoveredSection === 'window-settings' ? ColorToken.body : ColorToken.muted)
+              .fontColor(this.hoveredGear ? ColorToken.body : ColorToken.muted)
               .textAlign(TextAlign.Center)
           }
           .width(28)
           .height(28)
           .borderRadius(5)
-          .backgroundColor(this.hoveredSection === 'window-settings' ? ColorToken.hover_bg : Color.Transparent)
+          .backgroundColor(this.hoveredGear ? ColorToken.hover_bg : Color.Transparent)
           .justifyContent(FlexAlign.Center)
           .alignItems(HorizontalAlign.Center)
-          .onHover((isHover: boolean) => { this.hoveredSection = isHover ? 'window-settings' : '' })
-          .onClick(() => { this.activeTab = 'settings' })
+          .onHover((isHover: boolean) => { this.hoveredGear = isHover })
+          .onClick(() => { this.showWindowSettings = true })
         }
         .width('100%')
         .height(44)
@@ -96,6 +99,11 @@ export struct Inspector {
           this.colorPickerOpacity = val
         },
         onClose: () => { this.colorPickerVisible = false },
+      })
+
+      WindowSettingsDialog({
+        visible: this.showWindowSettings,
+        onClose: (): void => { this.showWindowSettings = false },
       })
     }
     .width(LayoutToken.inspector_width)
