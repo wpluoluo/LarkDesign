@@ -72,9 +72,13 @@ static napi_value NapiClearCanvas(napi_env env, napi_callback_info info) {
 }
 
 static napi_value NapiDrawRect(napi_env env, napi_callback_info info) {
-    size_t argc = 6;
-    napi_value args[6];
+    size_t argc = 8;
+    napi_value args[8];
     napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 8) {
+        napi_throw_error(env, nullptr, "drawRect requires 8 arguments");
+        return nullptr;
+    }
 
     int64_t ptr; bool lossless;
     napi_get_value_bigint_int64(env, args[0], &ptr, &lossless);

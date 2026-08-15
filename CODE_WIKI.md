@@ -1,5 +1,7 @@
 # LarkDesign · Code Wiki
 
+> 本文是 2026-07-27 生成的历史代码索引，不是正式状态或发布依据。当前结构、门禁和计划以 `docs/` 及根目录 `README.md` 为准；Ability/主页面入口已迁入 `entry/src/main/ets/app/`。
+
 > **项目名称**：Harmony Design Studio（HDS）
 > **Bundle ID**：`com.example.larkdesign`
 > **版本**：v1.0.0（构建 1000000）

@@ -1,4 +1,6 @@
-# LarkDesign 鸿蒙端迁移指南
+# LarkDesign 鸿蒙端迁移指南（历史参考）
+
+> 本文记录早期迁移过程，不是正式完成状态，也不构成发布证据。正式结构、门禁和当前计划以 `docs/architecture/`、`docs/standards/` 和 `docs/superpowers/plans/` 为准。Vue 原型已冻结为 reference-only。
 
 > 文档创建：2026-07-28
 > 源项目：f:\LarkDesign\原型设计\（Vue 3 原型）
@@ -181,6 +183,5 @@ UI (ArkTS) → Feature (ArkTS) → Domain (纯 TS/ArkTS) → Port (NAPI/系统 A
 - 视觉对比：原型截图 vs 鸿蒙端渲染
 - 交互对比：按 [interaction-spec.md](file:///f:/LarkDesign/shared/docs/interaction-spec.md) 逐项验证
 - 跨端对比：鸿蒙 / Android / iOS 三端一致性
-
 
 

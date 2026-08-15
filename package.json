@@ -6,10 +6,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "build": "pnpm -C 原型设计 build",
+    "build": "pnpm build:reference",
+    "build:reference": "pnpm -C 原型设计 build",
     "dev": "pnpm -C 原型设计 dev",
     "typecheck": "pnpm -C 原型设计 exec vue-tsc --noEmit",
-    "lint": "echo 'Lint not yet configured; see code-linter.json5 for HarmonyOS lint'",
+    "lint": "node scripts/verify-formal-project.mjs",
+    "verify:formal": "node scripts/verify-formal-project.mjs",
+    "verify:release": "node scripts/verify-formal-project.mjs --release",
+    "build:harmony": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build-harmony.ps1",
     "clean": "pnpm -C 原型设计 clean 2>$null; Remove-Item -Recurse -Force node_modules/.vite -ErrorAction SilentlyContinue"
   },
   "devDependencies": {

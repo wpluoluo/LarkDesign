@@ -23,6 +23,22 @@ napi/third_party/lcms2/build/
 原型设计/dist/
 原型设计/node_modules/
 
+# Local tools and generated evidence
+.arts/
+.codeartsdoer/
+.appanalyzer/
+.playwright-cli/
+.pw-daemon/
+local.properties
+.npmrc
+*.tsbuildinfo
+*.bak
+/*.png
+/after-*.yaml
+/homepage.yaml
+/workspace-*.yaml
+build_errors.txt
+
 # OS
 .DS_Store
 Thumbs.db

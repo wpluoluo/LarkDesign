@@ -27,13 +27,15 @@ void lark_scene_graph_destroy(LarkSceneGraph* sg) {
 }
 
 bool lark_scene_graph_load_json(LarkSceneGraph* sg, const char* json) {
+    if (!sg || !json || std::strlen(json) == 0) return false;
     sg->json_source = json;
-    return true;
+    // 解析器尚未接入，不能仅凭首字符宣称场景有效。
+    return false;
 }
 
 bool lark_scene_graph_render(LarkSceneGraph* sg, LarkCanvas* canvas) {
-    // TODO: 解析 JSON 并调用 canvas 绘制 API
-    // 这是 Fusion DOM 到 Skia 的核心映射逻辑
-    // 格式：{ "objects": [ { "type": "rect", "x":..., "y":..., "fill":... } ] }
-    return true;
+    // 场景节点解析尚未接入；明确失败，禁止向上层伪造成功。
+    (void)sg;
+    (void)canvas;
+    return false;
 }
