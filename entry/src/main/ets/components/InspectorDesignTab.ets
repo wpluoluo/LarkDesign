@@ -32,7 +32,8 @@ interface BlendModeOption {
 
 @Component
 export struct InspectorDesignTab {
-  @Prop onOpenColorPicker: (target: string, currentColor: string, currentOpacity: number) => void = () => {}
+  // 回调不是可观察状态，不能声明为 @Prop；HarmonyOS 状态系统会拒绝函数值。
+  onOpenColorPicker: (target: string, currentColor: string, currentOpacity: number) => void = () => {}
   @Prop colorPickerVersion: number = 0
 
   @State expandedSection: string = 'canvas'

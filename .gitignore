@@ -37,6 +37,7 @@ local.properties
 /after-*.yaml
 /homepage.yaml
 /workspace-*.yaml
+/device-*
 build_errors.txt
 
 # OS

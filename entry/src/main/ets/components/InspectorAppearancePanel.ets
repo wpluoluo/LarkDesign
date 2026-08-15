@@ -37,7 +37,8 @@ export struct InspectorAppearancePanel {
   @Link fxList: FxItem[]
   @Link hoveredAppearanceRow: string
   @Link hoveredBlendMode: boolean
-  @Prop onOpenColorPicker: (target: string, currentColor: string, currentOpacity: number) => void = () => {}
+  // 回调不是可观察状态，不能声明为 @Prop；HarmonyOS 状态系统会拒绝函数值。
+  onOpenColorPicker: (target: string, currentColor: string, currentOpacity: number) => void = () => {}
   @Prop hasFill: boolean = false
   @Prop hasTextColor: boolean = false
   @Prop hasStroke: boolean = false

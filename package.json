@@ -12,7 +12,7 @@
     "typecheck": "pnpm -C 原型设计 exec vue-tsc --noEmit",
     "lint": "node scripts/verify-formal-project.mjs",
     "verify:formal": "node scripts/verify-formal-project.mjs",
-    "verify:release": "node scripts/verify-formal-project.mjs --release",
+    "verify:release": "node scripts/verify-formal-project.mjs --release --native",
     "build:harmony": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build-harmony.ps1",
     "clean": "pnpm -C 原型设计 clean 2>$null; Remove-Item -Recurse -Force node_modules/.vite -ErrorAction SilentlyContinue"
   },

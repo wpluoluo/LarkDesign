@@ -7,8 +7,7 @@
       }
     },
     "externalNativeOptions": {
-      "path": "../napi/CMakeLists.txt",
-      "arguments": "-DSKIA_DIR=../napi/third_party/skia -DLCMS2_DIR=../napi/third_party/lcms2",
+      "path": "./src/main/cpp/CMakeLists.txt",
       "abiFilters": [
         "arm64-v8a",
         "x86_64"

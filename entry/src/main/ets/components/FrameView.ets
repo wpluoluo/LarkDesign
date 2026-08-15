@@ -16,6 +16,7 @@ import { ColorToken } from '../tokens/DesignTokens'
 import { FontWeightConstant, FontSizeToken, RadiusToken, ShadowToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
 import { Frame, SceneObject, Layer } from '../types/SceneTypes'
+import { NativeCanvasPreview } from './NativeCanvasPreview'
 
 @Component
 export struct FrameView {
@@ -27,6 +28,7 @@ export struct FrameView {
   @Prop zoom: number = 100
   @Prop isSelected: boolean = false
   @Prop editingMode: boolean = false
+  @Prop interactionTool: string = 'select'
   onSelect: (additive: boolean) => void = () => {}
   onMove: (x: number, y: number) => void = () => {}
   onResize: (w: number, h: number) => void = () => {}
@@ -115,6 +117,13 @@ export struct FrameView {
           .borderRadius(1)
           .shadow({ radius: 2, color: '#00000012', offsetX: 0, offsetY: 1 })
 
+        // NativeDrawing 输出真实画板像素；ArkUI 覆盖层继续负责选框和交互。
+        NativeCanvasPreview({ frame: this.frame })
+          .width(this.frame.width)
+          .height(this.frame.height)
+          .position({ x: 0, y: 0 })
+          .hitTestBehavior(HitTestMode.None)
+
         // 选中高亮环
         if (this.isSelected) {
           Column()
@@ -181,7 +190,9 @@ export struct FrameView {
     .width(`${this.frame.width}px`)
     .height(`${this.frame.height}px`)
     .position({ x: this.frame.x, y: this.frame.y })
-    .hitTestBehavior(HitTestMode.Default)
+    // 形状/文本工具需要把拖拽交给 CanvasStage；选择/抓手工具仍由 FrameView 处理。
+    .hitTestBehavior(this.interactionTool === 'select' || this.interactionTool === 'hand'
+      ? HitTestMode.Default : HitTestMode.Transparent)
     .gesture(
       GestureGroup(GestureMode.Exclusive,
         TapGesture({ count: 2 })

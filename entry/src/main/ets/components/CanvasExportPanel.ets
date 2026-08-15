@@ -37,11 +37,11 @@ export struct CanvasExportPanel {
     }
   }
 
-  private doExport(): void {
+  private async doExport(): Promise<void> {
     this.exporting = true
     this.exportMessage = ''
     const fmt = this.exportFormat as ExportFormat
-    const result = this.exporter.export({ format: fmt, dpi: this.dpi, quality: 0.92 })
+    const result = await this.exporter.export({ format: fmt, dpi: this.dpi, quality: 0.92 })
     this.exportMessage = result.message
     setTimeout(() => {
       this.exporting = false

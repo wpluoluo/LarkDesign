@@ -198,13 +198,13 @@ export struct WorkspaceLayout {
 
                   // 水平刻度
                   Row() {
-                    ForEach(this.hMarksGen, (m: RulerMark) => {
+                    ForEach(this.hMarksGen ?? [], (m: RulerMark) => {
                       Text(m.label)
                         .fontSize(7)
                         .fontColor(ColorToken.ruler_text)
                         .position({ x: m.pos, y: 1 })
                     })
-                    ForEach(this.hTicksGen, (t: RulerTick) => {
+                    ForEach(this.hTicksGen ?? [], (t: RulerTick) => {
                       Column()
                         .width(1)
                         .height(t.pos % 50 === 0 ? 5 : (t.pos % 10 === 0 ? 3 : 2))
@@ -248,7 +248,7 @@ export struct WorkspaceLayout {
               Row() {
                 if (this.showRuler) {
                   Column() {
-                    ForEach(this.vMarksGen, (m: RulerMark) => {
+                    ForEach(this.vMarksGen ?? [], (m: RulerMark) => {
                       Text(m.label)
                         .fontSize(7)
                         .fontColor(ColorToken.ruler_text)
@@ -295,7 +295,7 @@ export struct WorkspaceLayout {
             .height('100%')
 
             // 参考线叠加层
-            ForEach(this.guidelines, (g: GuideLine) => {
+            ForEach(this.guidelines ?? [], (g: GuideLine) => {
               if (g.orientation === 'h') {
                 Stack({ alignContent: Alignment.Center }) {
                   Row()

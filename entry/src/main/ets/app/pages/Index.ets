@@ -15,6 +15,7 @@ import { LayerStore } from '../../stores/LayerStore'
 import { KeyboardShortcuts } from '../../utils/KeyboardShortcuts'
 import { SplashScreen } from '../../components/SplashScreen'
 import { WorkspaceLayout } from '../../components/WorkspaceLayout'
+import { BYOKStore } from '../../stores/BYOKStore'
 
 @Entry
 @Component
@@ -27,6 +28,7 @@ struct Index {
     ThemeStore.getInstance().init()
     DocumentStore.getInstance().init()
     FusionDocumentStore.getInstance().init()
+    BYOKStore.getInstance().init()
     ToolStore.getInstance()
     ColorStore.getInstance()
     ToastStore.getInstance()
@@ -57,7 +59,9 @@ struct Index {
     console.info('LarkDesign', `enterWorkspace: ${mode}`)
     // 根据模式创建对应类型的 Frame
     const fusion = FusionDocumentStore.getInstance()
-    fusion.newFrame(mode, '', 60, 60)
+    const frame = fusion.newFrame(mode, '', 60, 60)
+    fusion.switchFrame(frame.id)
+    console.info('LarkDesign', `created frame=${frame.id} total=${fusion.getFrames().length}`)
     AppStorage.setOrCreate<string>('currentRoute', 'workspace')
   }
 }

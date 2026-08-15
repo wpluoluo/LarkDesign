@@ -63,10 +63,8 @@ export struct HistoryPanel {
   }
 
   private toggleCollapse(): void {
-    animateTo({ duration: 200, curve: Curve.EaseInOut }, () => {
-      this.collapsed = !this.collapsed
-      this.panelWidth = this.collapsed ? 36 : 200
-    })
+    this.collapsed = !this.collapsed
+    this.panelWidth = this.collapsed ? 36 : 200
   }
 
   private onUndo(): void {

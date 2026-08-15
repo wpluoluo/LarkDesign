@@ -4,6 +4,7 @@ import { join, relative } from 'node:path'
 
 const root = process.cwd()
 const releaseMode = process.argv.includes('--release')
+const nativeRequired = process.argv.includes('--native') || releaseMode
 const required = [
   'entry/src/main/module.json5',
   'entry/build-profile.json5',
@@ -24,7 +25,7 @@ const forbiddenNames = new Set([
   'build_errors.txt',
   'FrameView.ets.bak',
 ])
-const rootGenerated = /^(after-|workspace-.*\.yaml$|homepage\.yaml$|.*\.png$)/i
+const rootGenerated = /^(after-|workspace-.*\.yaml$|homepage\.yaml$|.*\.png$|device-)/i
 for (const entry of readdirSync(root, { withFileTypes: true })) {
   if (entry.isFile() && (forbiddenNames.has(entry.name) || rootGenerated.test(entry.name))) {
     errors.push(`根目录存在生成物或错误日志: ${entry.name}`)
@@ -64,6 +65,17 @@ if (releaseMode) {
     for (const item of releasePatterns) {
       if (item.pattern.test(text)) errors.push(`${item.label}: ${relative(root, file)}`)
     }
+  }
+}
+
+if (nativeRequired) {
+  const nativeCandidates = [
+    join(root, 'entry/build/default/intermediates/libs/default/arm64-v8a/liblark_engine.so'),
+    join(root, 'entry/build/default/intermediates/stripped_native_libs/default/arm64-v8a/liblark_engine.so'),
+    join(root, 'napi/build/libs/arm64-v8a/liblark_engine.so'),
+  ]
+  if (!nativeCandidates.some(existsSync)) {
+    errors.push('未发现 liblark_engine.so；ArkTS/HAP 构建不得在 Native 未编译时放行')
   }
 }
 

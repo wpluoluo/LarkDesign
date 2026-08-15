@@ -1,4 +1,6 @@
 import http from '@ohos.net.http'
+import preferences from '@ohos.data.preferences'
+import { AppContext } from '../platform/AppContext'
 
 export interface ByokConfig {
   provider: string
@@ -12,6 +14,17 @@ export interface TestResult {
   ok: boolean
   message: string
   models?: string[]
+}
+
+interface ChatMessage {
+  role: string
+  content: string
+}
+
+interface ChatRequest {
+  model: string
+  temperature: number
+  messages: ChatMessage[]
 }
 
 class ProviderPresets {
@@ -47,6 +60,7 @@ export class BYOKStore {
   private _config: ByokConfig = defaultConfig()
   private _isTesting: boolean = false
   private _lastTestResult: TestResult | null = null
+  private _preferences: preferences.Preferences | null = null
 
   private constructor() {}
 
@@ -55,6 +69,26 @@ export class BYOKStore {
       BYOKStore.instance = new BYOKStore()
     }
     return BYOKStore.instance
+  }
+
+  init(): void {
+    const context = AppContext.get()
+    if (context === null) return
+    void preferences.getPreferences(context, 'larkdesign-byok').then((store: preferences.Preferences) => {
+      this._preferences = store
+      return store.get('config', '')
+    }).then((raw: preferences.ValueType) => {
+      if (typeof raw !== 'string' || raw.length === 0) return
+      try {
+        const value = JSON.parse(raw) as Partial<ByokConfig>
+        this.updateConfig(value)
+        AppStorage.setOrCreate<number>('byokVersion', Date.now())
+      } catch (error) {
+        console.error('BYOKStore', 'load failed: ' + error)
+      }
+    }).catch((error: Error) => {
+      console.error('BYOKStore', 'preferences unavailable: ' + error.message)
+    })
   }
 
   get config(): ByokConfig {
@@ -90,12 +124,46 @@ export class BYOKStore {
   }
 
   save(): void {
-    // 持久化预留
+    const json = JSON.stringify(this._config)
+    void this.persistConfig(json).then(() => {
+      AppStorage.setOrCreate<number>('byokVersion', Date.now())
+    }).catch((error: Error) => {
+      console.error('BYOKStore', 'save failed: ' + error.message)
+    })
+  }
+
+  private async persistConfig(json: string): Promise<void> {
+    try {
+      const context = AppContext.get()
+      if (context === null) throw new Error('application context is not initialized')
+      if (this._preferences === null) {
+        this._preferences = await preferences.getPreferences(context, 'larkdesign-byok')
+      }
+      await this._preferences.put('config', json)
+      await this._preferences.flush()
+    } catch (error) {
+      throw new Error('persist BYOK config failed: ' + error)
+    }
   }
 
   clear(): void {
     this._config = defaultConfig()
     this._lastTestResult = null
+    if (this._preferences !== null) {
+      void this.clearPersistedConfig().catch((error: Error) => {
+        console.error('BYOKStore', 'clear failed: ' + error.message)
+      })
+    }
+  }
+
+  private async clearPersistedConfig(): Promise<void> {
+    try {
+      if (this._preferences === null) return
+      await this._preferences.delete('config')
+      await this._preferences.flush()
+    } catch (error) {
+      throw new Error('clear BYOK config failed: ' + error)
+    }
   }
 
   async testConnection(): Promise<TestResult> {
@@ -155,6 +223,48 @@ export class BYOKStore {
       return result
     } finally {
       this._isTesting = false
+    }
+  }
+
+  async complete(userText: string): Promise<string> {
+    if (!this.isConfigured) throw new Error('请先在 BYOK 中配置 baseUrl、apiKey 和 modelId')
+    const request = http.createHttp()
+    try {
+      const messages: ChatMessage[] = [{ role: 'user', content: userText }]
+      const payload: ChatRequest = {
+        model: this._config.modelId,
+        temperature: this._config.temperature,
+        messages,
+      }
+      const response = await request.request(this._config.baseUrl.replace(/\/+$/, '') + '/chat/completions', {
+        method: http.RequestMethod.POST,
+        header: {
+          'Authorization': 'Bearer ' + this._config.apiKey,
+          'Content-Type': 'application/json',
+        },
+        extraData: JSON.stringify(payload),
+        connectTimeout: 15000,
+        readTimeout: 60000,
+      })
+      if (response.responseCode < 200 || response.responseCode >= 300) {
+        throw new Error('HTTP ' + response.responseCode)
+      }
+      const root = JSON.parse(response.result as string) as Record<string, Object>
+      const choices = root['choices']
+      if (!(choices instanceof Array) || choices.length === 0) throw new Error('响应缺少 choices')
+      const first = choices[0] as Record<string, Object>
+      const message = first['message'] as Record<string, Object>
+      const content = message['content']
+      if (typeof content !== 'string' || content.length === 0) throw new Error('响应缺少 message.content')
+      return content
+    } catch (error) {
+      throw new Error('BYOK request failed: ' + error)
+    } finally {
+      try {
+        request.destroy()
+      } catch (error) {
+        console.error('BYOKStore', 'destroy HTTP request failed: ' + error)
+      }
     }
   }
 

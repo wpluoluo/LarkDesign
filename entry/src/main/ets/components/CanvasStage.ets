@@ -115,6 +115,7 @@ export struct CanvasStage {
   private interactionEngine: CanvasInteraction = CanvasInteraction.getInstance()
   @State frames: Frame[] = []
   @State currentFrameId: string = ''
+  private frameSnapshot: Frame | null = null
 
   // ─── 文本编辑状态 ───
   @State editingObjId: string = ''
@@ -140,6 +141,7 @@ export struct CanvasStage {
   aboutToAppear(): void {
     this.syncFrames()
     this.currentFrameId = this.fusionStore.getSelectedFrameId()
+    console.info('CanvasStage', `appear frames=${this.frames.length} selected=${this.currentFrameId}`)
     // 绑定引擎回调
     this.viewportEngine.bindCallback(new ViewportCB(this))
     this.interactionEngine.bindCallback(new InteractionCB(this))
@@ -152,13 +154,16 @@ export struct CanvasStage {
 
   /** 从 FusionDocumentStore 同步 Frame 数据 */
   syncFrames(): void {
-    this.frames = this.fusionStore.getFrames()
+    // 状态系统在异步文档恢复期间可能短暂返回 undefined；ForEach 只能接收稳定数组。
+    this.frames = this.fusionStore.getFrames() ?? []
     this.currentFrameId = this.fusionStore.getSelectedFrameId()
+    this.frameSnapshot = this.frames.find((f: Frame) => f.id === this.currentFrameId) ?? null
+    console.info('CanvasStage', `sync frames=${this.frames.length} selected=${this.currentFrameId}`)
   }
 
   /** 获取当前 Frame */
   private get currentFrame(): Frame | null {
-    return this.frames.find((f: Frame) => f.id === this.currentFrameId) ?? null
+    return (this.frames ?? []).find((f: Frame) => f.id === this.currentFrameId) ?? null
   }
 
   /** 获取当前 Frame 的所有图层对象（扁平化） */
@@ -479,28 +484,26 @@ export struct CanvasStage {
 
       // 3. 可平移/缩放的内容层
       Stack({ alignContent: Alignment.TopStart }) {
-        // 渲染所有 Frame
-        ForEach(this.frames, (frame: Frame) => {
+        // 直接构建当前 Frame，避免设备端 ForEach 在文档异步恢复期间吞掉整个画布子树。
+        if (this.frameSnapshot !== null) {
           FrameView({
-            frame: frame,
+            frame: this.frameSnapshot,
             zoom: this.zoom,
-            isSelected: frame.id === this.currentFrameId,
+            isSelected: true,
+            interactionTool: this.currentTool,
             onSelect: () => {
-              this.currentFrameId = frame.id
-              this.fusionStore.switchFrame(frame.id)
+              this.fusionStore.switchFrame(this.currentFrameId)
               this.selectedObjId = ''
             }
           })
 
           // 渲染当前选中 Frame 内的对象
-          if (frame.id === this.currentFrameId) {
-            ForEach(frame.children, (layer: Layer) => {
-              ForEach(layer.objects, (obj: SceneObject) => {
-                this.renderSceneObject(obj, layer.id)
-              })
+          ForEach(this.frameSnapshot.children ?? [], (layer: Layer) => {
+            ForEach(layer.objects ?? [], (obj: SceneObject) => {
+              this.renderSceneObject(obj, layer.id)
             })
-          }
-        }, (frame: Frame) => frame.id)
+          })
+        }
 
         // 无 Frame 时显示提示
         if (this.frames.length === 0) {
@@ -659,7 +662,7 @@ export struct CanvasStage {
         .position({ x: '45%', y: 12 })
       }
 
-      }
+    }
     .width('100%').height('100%').backgroundColor(ColorToken.canvas_bg).clip(true)
     .onClick(() => { this.onCanvasClick() })
 

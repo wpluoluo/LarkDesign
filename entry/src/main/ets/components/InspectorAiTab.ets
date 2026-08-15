@@ -6,6 +6,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { FontWeightConstant } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
+import { BYOKStore } from '../stores/BYOKStore'
 
 /** AI 对话消息 */
 interface AiMessage {
@@ -30,6 +31,12 @@ export struct InspectorAiTab {
   @State hoveredAiHeaderBtn: string = ''
   @State hoveredAiSend: boolean = false
   @State hoveredAiAttach: boolean = false
+  private byokStore: BYOKStore = BYOKStore.getInstance()
+
+  aboutToAppear(): void {
+    this.byokConfigured = this.byokStore.isConfigured
+    this.byokModelId = this.byokStore.config.modelId
+  }
 
   build(): void {
     Column() {
@@ -369,21 +376,21 @@ export struct InspectorAiTab {
     .height('100%')
   }
 
-  private onAiSend(): void {
+  private async onAiSend(): Promise<void> {
     const text = this.aiInputText.trim()
     if (text === '' || this.aiThinking) return
     this.aiInputText = ''
     this.aiMessages.push({ role: 'user', content: text })
     this.aiThinking = true
-    setTimeout(() => {
+    try {
+      const reply = await this.byokStore.complete(text)
       this.aiThinking = false
-      const reply = this.demoReply(text)
       this.aiMessages.push({ role: 'assistant', content: reply })
-      if (text.indexOf('图层') >= 0 || text.indexOf('列表') >= 0 || text.indexOf('画布') >= 0) {
-        this.aiToolCallCount += 1
-        this.aiMessages.push({ role: 'tool', content: '', name: 'apply_design_change' })
-      }
-    }, 600)
+    } catch (error) {
+      this.aiThinking = false
+      this.aiLastError = String(error)
+      this.aiMessages.push({ role: 'assistant', content: '请求失败：' + this.aiLastError })
+    }
   }
 
   private clearAiConversation(): void {
@@ -392,23 +399,4 @@ export struct InspectorAiTab {
     this.aiToolCallCount = 0
   }
 
-  private demoReply(input: string): string {
-    if (input.indexOf('新建') >= 0 && input.indexOf('图层') >= 0) {
-      this.aiLayerCount += 1
-      return `已为你新建一个白底图层（当前共 ${this.aiLayerCount} 个图层）。你可以在左侧图层面板中查看并继续编辑。`
-    }
-    if (input.indexOf('列表') >= 0) {
-      return '已生成列表结构：\n• 标题：欢迎使用 LarkDesign\n• 副标题：智能设计协作平台\n• 内容：AI 驱动的设计工作流\n\n可通过左侧面板调整层级和样式。'
-    }
-    if (input.indexOf('白底') >= 0) {
-      return '已将当前图层背景设置为白色（#FFFFFF）。'
-    }
-    if (input.indexOf('深色') >= 0 && input.indexOf('背景') >= 0) {
-      return '已切换画布为深色背景模式，文字色已同步调整为浅色以保证对比度。'
-    }
-    if (input.indexOf('画布') >= 0 && input.indexOf('信息') >= 0) {
-      return `画布信息：\n• 尺寸：595 × 842\n• 单位：mm\n• 页数：1\n• 图层数：${this.aiLayerCount}\n• 缩放：100%`
-    }
-    return `我已收到你的需求：「${input}」。\n\n当前为演示模式，仅支持关键词识别（新建图层 / 列表 / 白底 / 深色背景 / 画布信息）。点击右上角齿轮配置 BYOK 以接入真实大模型。`
-  }
 }

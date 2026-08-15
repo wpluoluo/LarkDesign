@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +30,7 @@ extern "C" {
 #define LARK_CAP_LCMS2         (1u << 1)
 #define LARK_CAP_PDF_EXPORT    (1u << 2)
 #define LARK_CAP_SVG_IMPORT    (1u << 3)
+#define LARK_CAP_NATIVE_DRAWING (1u << 4)
 
 /* ═══════════════ 基础类型 ═══════════════ */
 
@@ -120,6 +122,11 @@ void lark_canvas_save(LarkCanvas* canvas);
 
 /** 恢复画布状态（pop） */
 void lark_canvas_restore(LarkCanvas* canvas);
+
+/** 获取画布 RGBA 像素快照（句柄有效期内稳定，下一次绘制后更新） */
+const uint8_t* lark_canvas_pixels(LarkCanvas* canvas, size_t* out_len);
+int32_t lark_canvas_width(const LarkCanvas* canvas);
+int32_t lark_canvas_height(const LarkCanvas* canvas);
 
 /* ═══════════════ 场景图 ═══════════════ */
 

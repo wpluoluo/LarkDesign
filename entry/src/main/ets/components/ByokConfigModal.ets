@@ -25,8 +25,8 @@ export struct ByokConfigModal {
     const config = this.byokStore.config
     this.provider = config.provider
     this.apiKey = config.apiKey
-    this.model = config.model
-    this.endpoint = config.endpoint
+    this.model = config.modelId
+    this.endpoint = config.baseUrl
     this.isVisible = true
   }
 
@@ -199,10 +199,10 @@ export struct ByokConfigModal {
               this.byokStore.updateConfig({
                 provider: this.provider,
                 apiKey: this.apiKey,
-                model: this.model,
-                endpoint: this.endpoint,
-                enabled: true,
+                modelId: this.model,
+                baseUrl: this.endpoint,
               })
+              this.byokStore.save()
               this.hide()
             })
           }

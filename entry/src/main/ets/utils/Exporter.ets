@@ -2,6 +2,9 @@ import { FusionDocumentStore } from '../stores/FusionDocumentStore'
 import { serialize, estimateSize } from '../types/FusionSerializer'
 import { Canvas2DRenderer } from './Canvas2DRenderer'
 import { Frame, SceneObject, Layer, HdsDocument } from '../types/SceneTypes'
+import image from '@ohos.multimedia.image'
+import { NativeEngine } from '../native/NativeEngine'
+import { FilePersistence } from '../platform/FilePersistence'
 
 export type ExportFormat = 'hds' | 'json' | 'png' | 'jpeg' | 'webp' | 'svg' | 'pdf' | 'eps' | 'cdr'
 
@@ -18,6 +21,7 @@ export interface ExportResult {
   format: ExportFormat
   message: string
   bytes?: number
+  path?: string
 }
 
 export interface ExportFormatInfo {
@@ -102,6 +106,59 @@ function layerToSvg(layer: Layer): string {
   return '  <g name="' + escapeXml(layer.name) + '"' + opacity + '>\n' + lines.join('\n') + '\n  </g>'
 }
 
+function pdfEscape(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
+}
+
+/** 生成单页、可被标准 PDF 阅读器打开的矢量 PDF。 */
+function buildSimplePdf(frame: Frame | null): string {
+  const width = frame?.width ?? 595
+  const height = frame?.height ?? 842
+  const commands: string[] = []
+  commands.push('q 1 1 1 rg 0 0 ' + width + ' ' + height + ' re f Q')
+  if (frame !== null) {
+    for (const layer of frame.children) {
+      if (!layer.visible) continue
+      for (const obj of layer.objects) {
+        if (!obj.visible) continue
+        const t = obj.transform
+        if (obj.type === 'text') {
+          const text = pdfEscape(obj.text ?? obj.name)
+          commands.push('BT /F1 ' + (obj.fontSize ?? 14) + ' Tf 0 0 0 rg 1 0 0 1 ' + t.x + ' ' + (height - t.y - (obj.fontSize ?? 14)) + ' Tm (' + text + ') Tj ET')
+        } else {
+          const fill = obj.fill ?? '#3AC487'
+          let hex = fill.charAt(0) === '#' ? fill.substring(1) : '3AC487'
+          if (hex.length === 8) hex = hex.substring(2)
+          const r = parseInt(hex.substring(0, 2), 16) / 255
+          const g = parseInt(hex.substring(2, 4), 16) / 255
+          const b = parseInt(hex.substring(4, 6), 16) / 255
+          commands.push(r.toFixed(4) + ' ' + g.toFixed(4) + ' ' + b.toFixed(4) + ' rg ' + t.x + ' ' + (height - t.y - t.height) + ' ' + t.width + ' ' + t.height + ' re f')
+        }
+      }
+    }
+  }
+  const content = commands.join('\n') + '\n'
+  const objects: string[] = []
+  objects.push('<< /Type /Catalog /Pages 2 0 R >>')
+  objects.push('<< /Type /Pages /Kids [3 0 R] /Count 1 >>')
+  objects.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + width + ' ' + height + '] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>')
+  objects.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>')
+  objects.push('<< /Length ' + content.length + ' >>\nstream\n' + content + 'endstream')
+  let pdf = '%PDF-1.4\n%LarkDesign\n'
+  const offsets: number[] = [0]
+  for (let i = 0; i < objects.length; i++) {
+    offsets.push(pdf.length)
+    pdf += (i + 1) + ' 0 obj\n' + objects[i] + '\nendobj\n'
+  }
+  const xref = pdf.length
+  pdf += 'xref\n0 ' + (objects.length + 1) + '\n0000000000 65535 f \n'
+  for (let i = 1; i < offsets.length; i++) {
+    pdf += offsets[i].toString().padStart(10, '0') + ' 00000 n \n'
+  }
+  pdf += 'trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n'
+  return pdf
+}
+
 export class Exporter {
   private static instance: Exporter
   private fusionStore: FusionDocumentStore = FusionDocumentStore.getInstance()
@@ -129,21 +186,21 @@ export class Exporter {
     return baseName + '.' + ext
   }
 
-  export(opts: ExportOptions): ExportResult {
+  async export(opts: ExportOptions): Promise<ExportResult> {
     const filename = opts.filename ?? this.getDefaultFilename(opts.format)
     const format = opts.format
     try {
       if (format === 'hds' || format === 'json') {
-        return this.exportJson(format, filename)
+        return await this.exportJson(format, filename)
       }
       if (format === 'png' || format === 'jpeg' || format === 'webp') {
-        return this.exportImage(format, filename, opts.quality ?? 0.92, opts.dpi ?? 72)
+        return await this.exportImage(format, filename, opts.quality ?? 0.92, opts.dpi ?? 72)
       }
       if (format === 'svg') {
-        return this.exportSvg(filename)
+        return await this.exportSvg(filename)
       }
       if (format === 'pdf') {
-        return this.exportPdf(filename)
+        return await this.exportPdf(filename)
       }
       if (format === 'eps' || format === 'cdr') {
         return this.exportVectorStub(format, filename)
@@ -168,59 +225,66 @@ export class Exporter {
     return ctx.getPixelMap(0, 0, w, h)
   }
 
-  private exportJson(format: ExportFormat, filename: string): ExportResult {
+  private async exportJson(format: ExportFormat, filename: string): Promise<ExportResult> {
     const doc = this.fusionStore.getDocument()
     const json = serialize(doc, format === 'json')
     const bytes = json.length
-    AppStorage.setOrCreate<string>('export_data', json)
-    AppStorage.setOrCreate<string>('export_filename', filename)
-    AppStorage.setOrCreate<string>('export_mime', format === 'json' ? 'application/json' : 'application/octet-stream')
-    AppStorage.setOrCreate<boolean>('export_ready', true)
+    const path = await FilePersistence.writeText(filename, json)
     return {
       ok: true,
       filename,
       format,
       message: '已导出 ' + format.toUpperCase() + '，' + estimateSize(this.fusionStore.getDocument()) + 'KB',
       bytes,
+      path,
     }
   }
 
-  private exportImage(format: ExportFormat, filename: string, quality: number, dpi: number): ExportResult {
-    let mimeType = 'image/png'
-    if (format === 'jpeg') mimeType = 'image/jpeg'
-    if (format === 'webp') mimeType = 'image/webp'
+  private async exportImage(format: ExportFormat, filename: string, quality: number, dpi: number): Promise<ExportResult> {
     const frame = this.fusionStore.getCurrentFrame()
     if (!frame) {
       return { ok: false, filename, format, message: '没有可导出的画板' }
     }
-    AppStorage.setOrCreate<string>('export_filename', filename)
-    AppStorage.setOrCreate<string>('export_mime', mimeType)
-    AppStorage.setOrCreate<number>('export_quality', quality)
-    AppStorage.setOrCreate<number>('export_dpi', dpi)
-    AppStorage.setOrCreate<number>('export_frame_width', frame.width)
-    AppStorage.setOrCreate<number>('export_frame_height', frame.height)
-    AppStorage.setOrCreate<string>('export_format', format)
-    if (this.canvasContext) {
-      const pm = this.exportCanvasToPixelMap(this.canvasContext, frame.width, frame.height, dpi)
-      if (pm) {
-        AppStorage.setOrCreate<object>('export_pixelmap', pm as object)
-        AppStorage.setOrCreate<boolean>('export_ready', true)
-        return {
-          ok: true, filename, format,
-          message: '已导出 ' + format.toUpperCase() + '，' + dpi + 'DPI',
-          bytes: frame.width * frame.height * 4,
+    let data: ArrayBuffer | null = null
+    if (format === 'png') {
+      data = await NativeEngine.renderPng(frame)
+    } else {
+      const pixelMap = await NativeEngine.renderFrame(frame)
+      if (pixelMap !== null) {
+        const packer = image.createImagePacker()
+        try {
+          const mime = format === 'jpeg' ? 'image/jpeg' : 'image/webp'
+          data = await packer.packToData(pixelMap, { format: mime, quality: Math.round(quality * 100) })
+        } catch (error) {
+          console.error('Exporter', 'image encode failed: ' + error)
+          data = null
+        } finally {
+          try {
+            await packer.release()
+          } catch (error) {
+            console.error('Exporter', 'release image packer failed: ' + error)
+          }
+          try {
+            await pixelMap.release()
+          } catch (error) {
+            console.error('Exporter', 'release pixel map failed: ' + error)
+          }
         }
       }
     }
-    AppStorage.setOrCreate<boolean>('export_ready', true)
+    if (data === null || data.byteLength === 0) {
+      return { ok: false, filename, format, message: 'Native 渲染或编码失败' }
+    }
+    const path = await FilePersistence.writeBytes(filename, data)
     return {
       ok: true, filename, format,
-      message: '已准备 ' + format.toUpperCase() + ' 导出，请通过 Canvas API 渲染',
-      bytes: 0,
+      message: '已导出 ' + format.toUpperCase() + '，' + dpi + 'DPI',
+      bytes: data.byteLength,
+      path,
     }
   }
 
-  private exportSvg(filename: string): ExportResult {
+  private async exportSvg(filename: string): Promise<ExportResult> {
     const doc = this.fusionStore.getDocument()
     const w = doc.scene.canvasWidth
     const h = doc.scene.canvasHeight
@@ -235,40 +299,30 @@ export class Exporter {
       '  <rect x="0" y="0" width="' + w + '" height="' + h + '" fill="' + bg + '" />\n' +
       layersXml.join('\n') + '\n' +
       '</svg>'
-    AppStorage.setOrCreate<string>('export_data', svg)
-    AppStorage.setOrCreate<string>('export_filename', filename)
-    AppStorage.setOrCreate<string>('export_mime', 'image/svg+xml')
-    AppStorage.setOrCreate<boolean>('export_ready', true)
+    const path = await FilePersistence.writeText(filename, svg)
     return {
       ok: true, filename, format: 'svg',
       message: '已导出 SVG · ' + layersXml.length + ' 层',
       bytes: svg.length,
+      path,
     }
   }
 
-  private exportPdf(filename: string): ExportResult {
-    AppStorage.setOrCreate<string>('export_data', '')
-    AppStorage.setOrCreate<string>('export_filename', filename)
-    AppStorage.setOrCreate<string>('export_mime', 'application/pdf')
-    AppStorage.setOrCreate<boolean>('export_ready', true)
+  private async exportPdf(filename: string): Promise<ExportResult> {
+    const pdf = buildSimplePdf(this.fusionStore.getCurrentFrame())
+    const path = await FilePersistence.writeText(filename, pdf)
     return {
       ok: true, filename, format: 'pdf',
-      message: 'PDF 导出请使用系统打印功能',
-      bytes: 0,
+      message: '已导出 PDF',
+      bytes: pdf.length,
+      path,
     }
   }
 
   private exportVectorStub(format: ExportFormat, filename: string): ExportResult {
-    const doc = this.fusionStore.getDocument()
-    const json = serialize(doc, true)
-    AppStorage.setOrCreate<string>('export_data', json)
-    AppStorage.setOrCreate<string>('export_filename', filename)
-    AppStorage.setOrCreate<string>('export_mime', 'application/json')
-    AppStorage.setOrCreate<boolean>('export_ready', true)
     return {
-      ok: true, filename, format,
-      message: format.toUpperCase() + ' 格式暂不支持，已导出 JSON 兜底',
-      bytes: json.length,
+      ok: false, filename, format,
+      message: format.toUpperCase() + ' 当前未实现，未生成伪文件',
     }
   }
 }

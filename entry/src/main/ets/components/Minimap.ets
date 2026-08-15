@@ -55,10 +55,8 @@ export struct Minimap {
 
   /** 切换展开/收起，带过渡动画 */
   private toggleExpand(): void {
-    animateTo({ duration: 200, curve: Curve.EaseInOut }, () => {
-      this.expanded = !this.expanded
-      this.chevronAngle = this.expanded ? 0 : 180
-    })
+    this.expanded = !this.expanded
+    this.chevronAngle = this.expanded ? 0 : 180
   }
 
   build(): void {

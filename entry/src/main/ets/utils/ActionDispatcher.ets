@@ -99,8 +99,11 @@ export class ActionDispatcher {
 
   exportTo(format: string): void {
     const fmt = format as ExportFormat
-    const result = this.exporter.export({ format: fmt })
-    this.showToast(result.message, 'export', result.ok ? 'success' : 'warning')
+    void this.exporter.export({ format: fmt }).then((result) => {
+      this.showToast(result.message, 'export', result.ok ? 'success' : 'warning')
+    }).catch((error: Error) => {
+      this.showToast('导出失败: ' + error.message, 'export', 'warning')
+    })
   }
 
   /* ═════════ 编辑 ═════════ */

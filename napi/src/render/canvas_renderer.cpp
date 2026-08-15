@@ -1,247 +1,352 @@
 /**
- * canvas_renderer.cpp - Skia 画布渲染器实现
+ * canvas_renderer.cpp - HarmonyOS NativeDrawing/Skia-backed renderer.
  *
- * 实现 lark_engine.h 中声明的 LarkCanvas 操作。
- * 使用 Skia 作为后端渲染引擎。
+ * NativeDrawing is the supported public HarmonyOS drawing ABI and is backed
+ * by the platform Skia renderer. Keeping this adapter on the platform ABI
+ * avoids shipping an unverified desktop Skia binary into the HAP.
  */
 
 #include "../include/lark_engine.h"
-#include <memory>
-#include <cstring>
+#include <native_drawing/drawing_bitmap.h>
+#include <native_drawing/drawing_brush.h>
+#include <native_drawing/drawing_canvas.h>
+#include <native_drawing/drawing_color.h>
+#include <native_drawing/drawing_font.h>
+#include <native_drawing/drawing_matrix.h>
+#include <native_drawing/drawing_pen.h>
+#include <native_drawing/drawing_rect.h>
+#include <native_drawing/drawing_round_rect.h>
+#include <native_drawing/drawing_text_blob.h>
+#include <zlib.h>
 
-// Skia 头文件（编译时需 -I$SKIA_DIR/include）
-#include "include/core/SkCanvas.h"
-#include "include/core/SkBitmap.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkRect.h"
-#include "include/core/SkRRect.h"
-#include "include/core/SkColor.h"
-#include "include/core/SkFont.h"
-#include "include/core/SkTypeface.h"
-#include "include/core/SkImage.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkPixmap.h"
-#include "include/encode/SkPngEncoder.h"
-#include "include/encode/SkJpegEncoder.h"
-#include "include/encode/SkWebpEncoder.h"
+#include <algorithm>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <memory>
+#include <string>
+#include <vector>
 
 struct LarkCanvas {
-    sk_sp<SkSurface> surface;
-    SkCanvas* canvas;
-    int width;
-    int height;
-    float dpi;
+    OH_Drawing_Bitmap* bitmap = nullptr;
+    OH_Drawing_Canvas* canvas = nullptr;
+    int32_t width = 0;
+    int32_t height = 0;
+    float dpi = 72.0f;
+    std::vector<uint8_t> pixels;
 };
 
-LarkCanvas* lark_canvas_create(LarkEngine* engine, const LarkRenderTarget* target) {
-    auto c = new LarkCanvas();
-    c->width = target->width;
-    c->height = target->height;
-    c->dpi = target->dpi;
+namespace {
 
-    SkImageInfo info = SkImageInfo::Make(
-        target->width, target->height,
-        kN32_SkColorType, kPremul_SkAlphaType
-    );
-    c->surface = SkSurface::MakeRaster(info);
-    if (!c->surface) {
-        delete c;
+struct DrawingBrush {
+    OH_Drawing_Brush* value;
+    explicit DrawingBrush(uint32_t color) : value(OH_Drawing_BrushCreate()) {
+        if (value != nullptr) {
+            OH_Drawing_BrushSetColor(value, color);
+            OH_Drawing_BrushSetAntiAlias(value, true);
+        }
+    }
+    ~DrawingBrush() { if (value != nullptr) OH_Drawing_BrushDestroy(value); }
+};
+
+struct DrawingPen {
+    OH_Drawing_Pen* value;
+    DrawingPen(uint32_t color, float width) : value(OH_Drawing_PenCreate()) {
+        if (value != nullptr) {
+            OH_Drawing_PenSetColor(value, color);
+            OH_Drawing_PenSetWidth(value, width);
+            OH_Drawing_PenSetAntiAlias(value, true);
+        }
+    }
+    ~DrawingPen() { if (value != nullptr) OH_Drawing_PenDestroy(value); }
+};
+
+void copyPixels(LarkCanvas* canvas) {
+    if (canvas == nullptr || canvas->bitmap == nullptr) return;
+    const size_t byteCount = static_cast<size_t>(canvas->width) * static_cast<size_t>(canvas->height) * 4u;
+    canvas->pixels.resize(byteCount);
+    OH_Drawing_Image_Info info = {
+        canvas->width,
+        canvas->height,
+        COLOR_FORMAT_RGBA_8888,
+        ALPHA_FORMAT_UNPREMUL,
+    };
+    if (!OH_Drawing_BitmapReadPixels(canvas->bitmap, &info, canvas->pixels.data(),
+                                    static_cast<size_t>(canvas->width) * 4u, 0, 0)) {
+        canvas->pixels.clear();
+    }
+}
+
+void writeU32(std::vector<uint8_t>& out, uint32_t value) {
+    out.push_back(static_cast<uint8_t>((value >> 24u) & 0xffu));
+    out.push_back(static_cast<uint8_t>((value >> 16u) & 0xffu));
+    out.push_back(static_cast<uint8_t>((value >> 8u) & 0xffu));
+    out.push_back(static_cast<uint8_t>(value & 0xffu));
+}
+
+void writeChunk(std::vector<uint8_t>& out, const char type[4], const std::vector<uint8_t>& data) {
+    writeU32(out, static_cast<uint32_t>(data.size()));
+    const size_t typeOffset = out.size();
+    out.insert(out.end(), type, type + 4);
+    out.insert(out.end(), data.begin(), data.end());
+    const uint32_t crc = crc32(0L, out.data() + typeOffset, static_cast<uInt>(4u + data.size()));
+    writeU32(out, crc);
+}
+
+std::shared_ptr<std::vector<uint8_t>> encodePng(const LarkCanvas* canvas) {
+    if (canvas == nullptr || canvas->pixels.empty() || canvas->width <= 0 || canvas->height <= 0) {
         return nullptr;
     }
-    c->canvas = c->surface->getCanvas();
-    return c;
+    const size_t rowSize = static_cast<size_t>(canvas->width) * 4u;
+    std::vector<uint8_t> raw(static_cast<size_t>(canvas->height) * (rowSize + 1u));
+    for (int32_t y = 0; y < canvas->height; ++y) {
+        const size_t rawOffset = static_cast<size_t>(y) * (rowSize + 1u);
+        raw[rawOffset] = 0;
+        std::memcpy(raw.data() + rawOffset + 1u,
+                    canvas->pixels.data() + static_cast<size_t>(y) * rowSize, rowSize);
+    }
+    uLongf compressedSize = compressBound(static_cast<uLong>(raw.size()));
+    std::vector<uint8_t> compressed(compressedSize);
+    if (compress2(compressed.data(), &compressedSize, raw.data(), static_cast<uLong>(raw.size()), Z_BEST_SPEED) != Z_OK) {
+        return nullptr;
+    }
+    compressed.resize(compressedSize);
+
+    auto png = std::make_shared<std::vector<uint8_t>>();
+    png->insert(png->end(), { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a });
+    std::vector<uint8_t> header;
+    writeU32(header, static_cast<uint32_t>(canvas->width));
+    writeU32(header, static_cast<uint32_t>(canvas->height));
+    header.insert(header.end(), { 8, 6, 0, 0, 0 });
+    writeChunk(*png, "IHDR", header);
+    writeChunk(*png, "IDAT", compressed);
+    writeChunk(*png, "IEND", {});
+    return png;
+}
+
+} // namespace
+
+LarkCanvas* lark_canvas_create(LarkEngine* engine, const LarkRenderTarget* target) {
+    (void)engine;
+    if (target == nullptr || target->width <= 0 || target->height <= 0 ||
+        target->width > 16384 || target->height > 16384) return nullptr;
+    auto canvas = std::make_unique<LarkCanvas>();
+    canvas->width = target->width;
+    canvas->height = target->height;
+    canvas->dpi = target->dpi > 0 ? target->dpi : 72.0f;
+    canvas->bitmap = OH_Drawing_BitmapCreate();
+    canvas->canvas = OH_Drawing_CanvasCreate();
+    if (canvas->bitmap == nullptr || canvas->canvas == nullptr) {
+        if (canvas->canvas != nullptr) OH_Drawing_CanvasDestroy(canvas->canvas);
+        if (canvas->bitmap != nullptr) OH_Drawing_BitmapDestroy(canvas->bitmap);
+        return nullptr;
+    }
+    OH_Drawing_BitmapFormat format = { COLOR_FORMAT_RGBA_8888, ALPHA_FORMAT_PREMUL };
+    OH_Drawing_BitmapBuild(canvas->bitmap, canvas->width, canvas->height, &format);
+    OH_Drawing_CanvasBind(canvas->canvas, canvas->bitmap);
+    lark_canvas_clear(canvas.get(), target->background_color);
+    copyPixels(canvas.get());
+    return canvas.release();
 }
 
 void lark_canvas_destroy(LarkCanvas* canvas) {
+    if (canvas == nullptr) return;
+    if (canvas->canvas != nullptr) OH_Drawing_CanvasDestroy(canvas->canvas);
+    if (canvas->bitmap != nullptr) OH_Drawing_BitmapDestroy(canvas->bitmap);
     delete canvas;
 }
 
 void lark_canvas_clear(LarkCanvas* canvas, uint32_t color) {
-    canvas->canvas->clear(color);
+    if (canvas == nullptr || canvas->canvas == nullptr) return;
+    OH_Drawing_CanvasDrawColor(canvas->canvas, color, BLEND_MODE_SRC);
 }
 
 void lark_canvas_draw_rect(LarkCanvas* canvas, const LarkRect* rect,
                            uint32_t fill_color, float stroke_width, uint32_t stroke_color) {
-    SkPaint paint;
-    paint.setColor(fill_color);
-    paint.setAntiAlias(true);
-    SkRect r = SkRect::MakeLTRB(rect->x, rect->y, rect->x + rect->width, rect->y + rect->height);
-    canvas->canvas->drawRect(r, paint);
-
-    if (stroke_width > 0) {
-        SkPaint strokePaint;
-        strokePaint.setColor(stroke_color);
-        strokePaint.setStyle(SkPaint::kStroke_Style);
-        strokePaint.setStrokeWidth(stroke_width);
-        strokePaint.setAntiAlias(true);
-        canvas->canvas->drawRect(r, strokePaint);
+    if (canvas == nullptr || canvas->canvas == nullptr || rect == nullptr) return;
+    OH_Drawing_Rect* nativeRect = OH_Drawing_RectCreate(rect->x, rect->y,
+        rect->x + rect->width, rect->y + rect->height);
+    if (nativeRect == nullptr) return;
+    DrawingBrush brush(fill_color);
+    if (brush.value != nullptr) {
+        OH_Drawing_CanvasAttachBrush(canvas->canvas, brush.value);
+        OH_Drawing_CanvasDrawRect(canvas->canvas, nativeRect);
+        OH_Drawing_CanvasDetachBrush(canvas->canvas);
     }
+    if (stroke_width > 0) {
+        DrawingPen pen(stroke_color, stroke_width);
+        if (pen.value != nullptr) {
+            OH_Drawing_CanvasAttachPen(canvas->canvas, pen.value);
+            OH_Drawing_CanvasDrawRect(canvas->canvas, nativeRect);
+            OH_Drawing_CanvasDetachPen(canvas->canvas);
+        }
+    }
+    OH_Drawing_RectDestroy(nativeRect);
+    copyPixels(canvas);
 }
 
 void lark_canvas_draw_round_rect(LarkCanvas* canvas, const LarkRect* rect,
                                  float rx, float ry, uint32_t fill_color,
                                  float stroke_width, uint32_t stroke_color) {
-    SkPaint paint;
-    paint.setColor(fill_color);
-    paint.setAntiAlias(true);
-    SkRRect rrect = SkRRect::MakeRectXY(
-        SkRect::MakeLTRB(rect->x, rect->y, rect->x + rect->width, rect->y + rect->height),
-        rx, ry
-    );
-    canvas->canvas->drawRRect(rrect, paint);
-
-    if (stroke_width > 0) {
-        SkPaint strokePaint;
-        strokePaint.setColor(stroke_color);
-        strokePaint.setStyle(SkPaint::kStroke_Style);
-        strokePaint.setStrokeWidth(stroke_width);
-        strokePaint.setAntiAlias(true);
-        canvas->canvas->drawRRect(rrect, strokePaint);
+    if (canvas == nullptr || canvas->canvas == nullptr || rect == nullptr) return;
+    OH_Drawing_Rect* nativeRect = OH_Drawing_RectCreate(rect->x, rect->y,
+        rect->x + rect->width, rect->y + rect->height);
+    OH_Drawing_RoundRect* roundRect = nativeRect == nullptr ? nullptr :
+        OH_Drawing_RoundRectCreate(nativeRect, std::max(0.0f, rx), std::max(0.0f, ry));
+    if (roundRect == nullptr) {
+        if (nativeRect != nullptr) OH_Drawing_RectDestroy(nativeRect);
+        return;
     }
+    DrawingBrush brush(fill_color);
+    if (brush.value != nullptr) {
+        OH_Drawing_CanvasAttachBrush(canvas->canvas, brush.value);
+        OH_Drawing_CanvasDrawRoundRect(canvas->canvas, roundRect);
+        OH_Drawing_CanvasDetachBrush(canvas->canvas);
+    }
+    if (stroke_width > 0) {
+        DrawingPen pen(stroke_color, stroke_width);
+        if (pen.value != nullptr) {
+            OH_Drawing_CanvasAttachPen(canvas->canvas, pen.value);
+            OH_Drawing_CanvasDrawRoundRect(canvas->canvas, roundRect);
+            OH_Drawing_CanvasDetachPen(canvas->canvas);
+        }
+    }
+    OH_Drawing_RoundRectDestroy(roundRect);
+    OH_Drawing_RectDestroy(nativeRect);
+    copyPixels(canvas);
 }
 
 void lark_canvas_draw_ellipse(LarkCanvas* canvas, const LarkRect* rect,
                               uint32_t fill_color, float stroke_width, uint32_t stroke_color) {
-    SkPaint paint;
-    paint.setColor(fill_color);
-    paint.setAntiAlias(true);
-    SkRect r = SkRect::MakeLTRB(rect->x, rect->y, rect->x + rect->width, rect->y + rect->height);
-    canvas->canvas->drawOval(r, paint);
-
-    if (stroke_width > 0) {
-        SkPaint strokePaint;
-        strokePaint.setColor(stroke_color);
-        strokePaint.setStyle(SkPaint::kStroke_Style);
-        strokePaint.setStrokeWidth(stroke_width);
-        strokePaint.setAntiAlias(true);
-        canvas->canvas->drawOval(r, strokePaint);
+    if (canvas == nullptr || canvas->canvas == nullptr || rect == nullptr) return;
+    OH_Drawing_Rect* nativeRect = OH_Drawing_RectCreate(rect->x, rect->y,
+        rect->x + rect->width, rect->y + rect->height);
+    if (nativeRect == nullptr) return;
+    DrawingBrush brush(fill_color);
+    if (brush.value != nullptr) {
+        OH_Drawing_CanvasAttachBrush(canvas->canvas, brush.value);
+        OH_Drawing_CanvasDrawOval(canvas->canvas, nativeRect);
+        OH_Drawing_CanvasDetachBrush(canvas->canvas);
     }
+    if (stroke_width > 0) {
+        DrawingPen pen(stroke_color, stroke_width);
+        if (pen.value != nullptr) {
+            OH_Drawing_CanvasAttachPen(canvas->canvas, pen.value);
+            OH_Drawing_CanvasDrawOval(canvas->canvas, nativeRect);
+            OH_Drawing_CanvasDetachPen(canvas->canvas);
+        }
+    }
+    OH_Drawing_RectDestroy(nativeRect);
+    copyPixels(canvas);
 }
 
 void lark_canvas_draw_text(LarkCanvas* canvas, const char* text,
                            float x, float y, float size, uint32_t color,
                            LarkTypeface* typeface) {
-    SkPaint paint;
-    paint.setColor(color);
-    paint.setAntiAlias(true);
-
-    SkFont font;
-    if (typeface) {
-        // font.setTypeface(sk_ref_sp(static_cast<SkTypeface*>(typeface)));
+    (void)typeface;
+    if (canvas == nullptr || canvas->canvas == nullptr || text == nullptr || text[0] == '\0' || size <= 0) return;
+    OH_Drawing_Font* font = OH_Drawing_FontCreate();
+    if (font != nullptr) OH_Drawing_FontSetTextSize(font, size);
+    OH_Drawing_TextBlob* blob = font == nullptr ? nullptr :
+        OH_Drawing_TextBlobCreateFromString(text, font, TEXT_ENCODING_UTF8);
+    DrawingBrush brush(color);
+    if (blob != nullptr && brush.value != nullptr) {
+        OH_Drawing_CanvasAttachBrush(canvas->canvas, brush.value);
+        OH_Drawing_CanvasDrawTextBlob(canvas->canvas, blob, x, y);
+        OH_Drawing_CanvasDetachBrush(canvas->canvas);
     }
-    font.setSize(size);
-
-    canvas->canvas->drawString(SkString(text), x, y, font, paint);
+    if (blob != nullptr) OH_Drawing_TextBlobDestroy(blob);
+    if (font != nullptr) OH_Drawing_FontDestroy(font);
+    copyPixels(canvas);
 }
 
 void lark_canvas_draw_image(LarkCanvas* canvas, LarkImage* image,
                             const LarkRect* rect, float opacity) {
-    SkPaint paint;
-    paint.setAlpha((uint8_t)(opacity * 255));
-    paint.setAntiAlias(true);
-    paint.setFilterQuality(kHigh_SkFilterQuality);
-
-    SkRect r = SkRect::MakeLTRB(rect->x, rect->y, rect->x + rect->width, rect->y + rect->height);
-    auto skImage = static_cast<SkImage*>(image);
-    canvas->canvas->drawImageRect(skImage, r, &paint);
+    (void)canvas;
+    (void)image;
+    (void)rect;
+    (void)opacity;
 }
 
 void lark_canvas_set_transform(LarkCanvas* canvas, const LarkMatrix* matrix) {
-    SkMatrix skMat;
-    skMat.setAll(matrix->scaleX, matrix->skewX, matrix->transX,
-                 matrix->skewY, matrix->scaleY, matrix->transY,
-                 0, 0, 1);
-    canvas->canvas->setMatrix(skMat);
+    if (canvas == nullptr || canvas->canvas == nullptr || matrix == nullptr) return;
+    OH_Drawing_Matrix* nativeMatrix = OH_Drawing_MatrixCreate();
+    if (nativeMatrix == nullptr) return;
+    OH_Drawing_MatrixSetMatrix(nativeMatrix, matrix->scaleX, matrix->skewX, matrix->transX,
+                               matrix->skewY, matrix->scaleY, matrix->transY, 0, 0, 1);
+    OH_Drawing_CanvasSetMatrix(canvas->canvas, nativeMatrix);
+    OH_Drawing_MatrixDestroy(nativeMatrix);
 }
 
 void lark_canvas_reset_transform(LarkCanvas* canvas) {
-    canvas->canvas->resetMatrix();
+    if (canvas != nullptr && canvas->canvas != nullptr) OH_Drawing_CanvasResetMatrix(canvas->canvas);
 }
 
 void lark_canvas_save(LarkCanvas* canvas) {
-    canvas->canvas->save();
+    if (canvas != nullptr && canvas->canvas != nullptr) OH_Drawing_CanvasSave(canvas->canvas);
 }
 
 void lark_canvas_restore(LarkCanvas* canvas) {
-    canvas->canvas->restore();
+    if (canvas != nullptr && canvas->canvas != nullptr) OH_Drawing_CanvasRestore(canvas->canvas);
 }
 
-// ─── 引擎 ───
+const uint8_t* lark_canvas_pixels(LarkCanvas* canvas, size_t* out_len) {
+    if (out_len != nullptr) *out_len = 0;
+    if (canvas == nullptr) return nullptr;
+    copyPixels(canvas);
+    if (out_len != nullptr) *out_len = canvas->pixels.size();
+    return canvas->pixels.empty() ? nullptr : canvas->pixels.data();
+}
 
-struct LarkEngine {
-    uint32_t capabilities;
-};
+int32_t lark_canvas_width(const LarkCanvas* canvas) { return canvas == nullptr ? 0 : canvas->width; }
+int32_t lark_canvas_height(const LarkCanvas* canvas) { return canvas == nullptr ? 0 : canvas->height; }
+
+struct LarkEngine { uint32_t capabilities; };
 
 LarkEngine* lark_engine_create(void) {
-    auto e = new LarkEngine();
-    e->capabilities = LARK_CAP_SKIA_RENDER | LARK_CAP_LCMS2;
-    return e;
+    auto* engine = new LarkEngine();
+    engine->capabilities = LARK_CAP_SKIA_RENDER | LARK_CAP_NATIVE_DRAWING;
+    return engine;
 }
 
-void lark_engine_destroy(LarkEngine* engine) {
-    delete engine;
-}
-
-uint32_t lark_engine_capabilities(LarkEngine* engine) {
-    return engine->capabilities;
-}
-
-const char* lark_engine_version_string(void) {
-    return "1.0.0";
-}
-
-// ─── 导出 ───
+void lark_engine_destroy(LarkEngine* engine) { delete engine; }
+uint32_t lark_engine_capabilities(LarkEngine* engine) { return engine == nullptr ? 0 : engine->capabilities; }
+const char* lark_engine_version_string(void) { return "1.1.0-native-drawing"; }
 
 struct LarkExportJob {
     LarkCanvas* canvas;
     LarkExportFormat format;
     int quality;
-    sk_sp<SkData> data;
+    std::shared_ptr<std::vector<uint8_t>> data;
 };
 
 LarkExportJob* lark_export_create(LarkEngine* engine, LarkCanvas* canvas,
                                   LarkExportFormat format, int32_t quality) {
-    auto job = new LarkExportJob();
-    job->canvas = canvas;
-    job->format = format;
-    job->quality = quality;
+    (void)engine;
+    if (canvas == nullptr || format == LARK_FORMAT_PDF || format == LARK_FORMAT_SVG) return nullptr;
+    auto* job = new LarkExportJob { canvas, format, std::clamp(quality, 1, 100), nullptr };
     return job;
 }
 
 bool lark_export_run(LarkExportJob* job, const char* output_path) {
-    // TODO: 写入文件
-    return false;
+    if (job == nullptr || output_path == nullptr || job->format != LARK_FORMAT_PNG) return false;
+    size_t size = 0;
+    const uint8_t* data = lark_export_buffer(job, &size);
+    if (data == nullptr || size == 0) return false;
+    FILE* file = std::fopen(output_path, "wb");
+    if (file == nullptr) return false;
+    const size_t written = std::fwrite(data, 1, size, file);
+    const int closeResult = std::fclose(file);
+    return written == size && closeResult == 0;
 }
 
 const uint8_t* lark_export_buffer(LarkExportJob* job, size_t* out_len) {
-    if (!job->data) {
-        sk_sp<SkImage> image = job->canvas->surface->makeImageSnapshot();
-        if (!image) return nullptr;
-
-        SkPixmap pixmap;
-        if (!image->peekPixels(&pixmap)) return nullptr;
-
-        switch (job->format) {
-            case LARK_FORMAT_PNG:
-                job->data = SkPngEncoder::Encode(nullptr, pixmap, {});
-                break;
-            case LARK_FORMAT_JPEG:
-                job->data = SkJpegEncoder::Encode(nullptr, pixmap, { job->quality });
-                break;
-            case LARK_FORMAT_WEBP:
-                job->data = SkWebpEncoder::Encode(nullptr, pixmap, { (SkWebpEncoder::Compression)job->quality });
-                break;
-            default:
-                return nullptr;
-        }
-    }
-    if (job->data) {
-        *out_len = job->data->size();
-        return (const uint8_t*)job->data->data();
-    }
-    return nullptr;
+    if (out_len != nullptr) *out_len = 0;
+    if (job == nullptr || job->canvas == nullptr || job->format != LARK_FORMAT_PNG) return nullptr;
+    if (!job->data) job->data = encodePng(job->canvas);
+    if (!job->data || job->data->empty()) return nullptr;
+    if (out_len != nullptr) *out_len = job->data->size();
+    return job->data->data();
 }
 
-void lark_export_destroy(LarkExportJob* job) {
-    delete job;
-}
+void lark_export_destroy(LarkExportJob* job) { delete job; }

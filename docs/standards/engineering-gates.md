@@ -35,4 +35,4 @@
 
 ## 4. 当前基线
 
-截至 2026-08-15，`pnpm test`、`pnpm typecheck` 和参考构建可作为参考回归；HarmonyOS Hvigor 初始化/ArkTS 编译与 NAPI 依赖仍未形成通过证据。因此本仓库不是可发布状态，计划见 [开发计划](../superpowers/plans/2026-08-15-harmony-formalization.md)。
+截至 2026-08-15，DevEco Studio `D:\DevEco Studio`、Hvigor/OHOS 插件 `6.22.4`、SDK `6.0.2` 已统一；`pnpm build:harmony` 已完成 Native arm64-v8a/x86_64、ArkTS 编译和 HAP 打包，设备工作区与 Native PixelMap 宿主已验收。签名、完整导出文件读回、重启恢复和剩余 ArkTS 警告仍是发布前门禁，计划见 [开发计划](../superpowers/plans/2026-08-15-harmony-formalization.md)。

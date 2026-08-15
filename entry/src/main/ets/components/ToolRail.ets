@@ -195,7 +195,7 @@ export struct ToolRail {
         .zIndex(ZIndexToken.dropdown)
       }
     }
-    .width('100%')
+    .width(LayoutToken.tool_rail_width)
     .height('100%')
   }
 

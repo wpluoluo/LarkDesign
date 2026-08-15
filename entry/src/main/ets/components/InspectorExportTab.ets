@@ -6,6 +6,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { LayoutToken, FontWeightConstant, ShadowToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
+import { Exporter, ExportFormat } from '../utils/Exporter'
 
 /** 导出格式选项 */
 interface ExportFormatOption {
@@ -48,6 +49,21 @@ export struct InspectorExportTab {
   @State hoveredExportPreset: string = ''
   @State hoveredExportColorSpace: string = ''
   @State hoveredExportSection: string = ''
+  @State exportStatus: string = ''
+
+  private exporter: Exporter = Exporter.getInstance()
+
+  private async exportCurrent(): Promise<void> {
+    const format: ExportFormat = this.exportFormat === 'jpg' ? 'jpeg' : this.exportFormat as ExportFormat
+    const result = await this.exporter.export({
+      format,
+      quality: this.exportQuality / 100,
+      dpi: 72,
+    })
+    this.exportStatus = result.ok
+      ? `${result.message} · ${result.bytes ?? 0} bytes`
+      : result.message
+  }
 
   build(): void {
     Scroll() {
@@ -138,6 +154,7 @@ export struct InspectorExportTab {
             .backgroundColor(ColorToken.primary_dark_700)
             .justifyContent(FlexAlign.Center)
             .alignItems(VerticalAlign.Center)
+            .onClick(() => { void this.exportCurrent() })
 
             Column() {
               Text(Icon.layers)
@@ -155,6 +172,14 @@ export struct InspectorExportTab {
           }
           .width('100%')
           .alignItems(VerticalAlign.Center)
+
+          if (this.exportStatus.length > 0) {
+            Text(this.exportStatus)
+              .fontSize(9)
+              .fontColor(ColorToken.muted)
+              .maxLines(2)
+              .margin({ top: 6 })
+          }
         }
         .width('100%')
         .padding({ left: 12, right: 12, top: 10, bottom: 10 })

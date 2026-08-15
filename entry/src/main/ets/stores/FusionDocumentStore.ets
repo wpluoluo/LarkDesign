@@ -15,6 +15,7 @@ import {
 } from '../types/FusionOps'
 import { FusionDocumentStoreInfo } from './FusionDocumentStoreInfo'
 import { serialize, deserialize, deepClone, estimateSize } from '../types/FusionSerializer'
+import { FilePersistence } from '../platform/FilePersistence'
 
 /** 历史记录条目 */
 export interface HistoryEntry {
@@ -80,36 +81,46 @@ export class FusionDocumentStore {
     }, 500)
   }
 
-  /** 保存文档到 AppStorage */
+  /** 保存文档到应用沙箱文件，AppStorage 只保留界面状态。 */
   saveToStorage(): void {
     try {
       const json = serialize(this.doc, true)
-      AppStorage.setOrCreate<string>('hds_document', json)
       const now = new Date().toISOString()
       AppStorage.setOrCreate<string>('hds_last_saved', now)
-      AppStorage.setOrCreate<string>('hds_save_status', '已自动保存')
+      AppStorage.setOrCreate<string>('hds_save_status', '保存中')
+      void FilePersistence.writeDocument(json).then(() => {
+        AppStorage.setOrCreate<string>('hds_save_status', '已自动保存')
+      }).catch((error: Error) => {
+        AppStorage.setOrCreate<string>('hds_save_status', '保存失败')
+        console.error('FusionDocumentStore', 'write document failed: ' + error.message)
+      })
     } catch (e) {
       AppStorage.setOrCreate<string>('hds_save_status', '保存失败')
       console.error('FusionDocumentStore', 'saveToStorage failed: ' + e)
     }
   }
 
-  /** 从 AppStorage 加载文档 */
+  /** 从应用沙箱文件加载文档。 */
   loadFromStorage(): void {
-    try {
-      const json = AppStorage.get<string>('hds_document')
-      if (json !== undefined && json.length > 0) {
+    void FilePersistence.readDocument().then((json: string | null) => {
+      if (json === null || json.length === 0) return
+      try {
         this.doc = deserialize(json)
-        console.info('FusionDocumentStore', 'Loaded document from storage, size: ' + estimateSize(this.doc) + 'KB')
+        this.historyStack = [JSON.stringify(this.doc)]
+        this.historyLabels = ['恢复文档']
+        this.historyIndex = 0
+        AppStorage.setOrCreate<number>('documentVersion', Date.now())
+        console.info('FusionDocumentStore', 'Loaded document from file, size: ' + estimateSize(this.doc) + 'KB')
+      } catch (error) {
+        console.error('FusionDocumentStore', 'loadFromStorage failed: ' + error)
       }
-    } catch (e) {
-      console.error('FusionDocumentStore', 'loadFromStorage failed: ' + e)
-    }
+    }).catch((error: Error) => {
+      console.error('FusionDocumentStore', 'read document failed: ' + error.message)
+    })
   }
 
   /** 清除存储的文档 */
   clearStorage(): void {
-    AppStorage.delete('hds_document')
     AppStorage.delete('hds_last_saved')
   }
 
