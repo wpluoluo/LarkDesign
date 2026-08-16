@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param(
-    [ValidateSet('assembleHap', 'assembleApp', 'clean', 'ohpm-install')]
+    [ValidateSet('assembleHap', 'assembleApp', 'clean', 'ohpm-install', 'test')]
     [string]$Task = 'assembleHap',
     [string]$DevEcoHome = $env:DEVECO_HOME,
     [string]$SdkHome = $env:DEVECO_SDK_HOME
@@ -80,6 +80,8 @@ try {
             throw "未找到 ohpm: $ohpmExe"
         }
         & $ohpmExe install
+    } elseif ($Task -eq 'test') {
+        & $nodeExe $hvigorJs test '--mode' module '-p' 'module=entry@default' '--no-daemon'
     } elseif ($Task -ne 'clean') {
         & (Join-Path $PSScriptRoot 'build-native.ps1') -DevEcoHome $DevEcoHome -SdkHome $SdkHome
         if ($LASTEXITCODE -ne 0) { throw 'Native 构建失败，停止 HAP 构建。' }

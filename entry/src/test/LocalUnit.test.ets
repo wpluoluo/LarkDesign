@@ -5,7 +5,29 @@ import {
   readFailed,
   writeOk,
   writeFailed,
+  PNG_MAGIC,
+  JPEG_MAGIC,
+  asciiMagic,
+  copyBytes,
+  matchesMagic,
+  verifyImageStructure,
+  verifyPdfStructure,
 } from '../main/ets/platform/PersistenceTypes'
+
+function asciiBytes(text: string): number[] {
+  const result: number[] = []
+  for (let i = 0; i < text.length; i++) {
+    result.push(text.charCodeAt(i))
+  }
+  return result
+}
+
+function toArrayBuffer(values: number[]): ArrayBuffer {
+  const source = new Uint8Array(values)
+  const target = new ArrayBuffer(source.length)
+  new Uint8Array(target).set(source)
+  return target
+}
 
 export default function localUnitTest() {
   describe('PersistenceTypesTest', () => {
@@ -27,6 +49,17 @@ export default function localUnitTest() {
       expect(/^[0-9a-f]{16}$/.test(empty)).assertTrue()
       expect(/^[0-9a-f]{16}$/.test(unicode)).assertTrue()
     })
+    it('copyBytesCopiesOnlyTheRequestedView', 0, () => {
+      const source = new ArrayBuffer(6)
+      const view = new Uint8Array(source, 1, 4)
+      view[0] = 0x50
+      view[1] = 0x44
+      view[2] = 0x46
+      view[3] = 0x21
+      const copied = copyBytes(view)
+      expect(copied.byteLength).assertEqual(4)
+      expect(matchesMagic(copied, asciiMagic('PDF!'), 0)).assertTrue()
+    })
     it('readResultShapes', 0, () => {
       const ok = readOk('{"a":1}', '/data/eldoc.json')
       expect(ok.ok).assertTrue()
@@ -47,6 +80,30 @@ export default function localUnitTest() {
       expect(failed.code).assertEqual('short-write')
       expect(failed.bytes).assertEqual(0)
       expect(failed.checksum).assertEqual('')
+    })
+    it('imageStructureRejectsMismatchedMagic', 0, () => {
+      const png = toArrayBuffer([...PNG_MAGIC, 0x00])
+      const jpeg = toArrayBuffer([...JPEG_MAGIC, 0x00])
+      const webp = toArrayBuffer([...asciiBytes('RIFF'), 0x00, 0x00, 0x00, 0x00, ...asciiBytes('WEBP')])
+      const pngCheck = verifyImageStructure(png, 'png')
+      const jpegCheck = verifyImageStructure(jpeg, 'jpeg')
+      const webpCheck = verifyImageStructure(webp, 'webp')
+      const mismatchedCheck = verifyImageStructure(png, 'jpeg')
+      const invalidPngCheck = verifyImageStructure(toArrayBuffer([0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50]), 'png')
+      expect(pngCheck.ok).assertTrue()
+      expect(jpegCheck.ok).assertTrue()
+      expect(webpCheck.ok).assertTrue()
+      expect(mismatchedCheck.ok).assertFalse()
+      expect(invalidPngCheck.ok).assertFalse()
+    })
+    it('pdfStructureRequiresValidCrossReferenceOffset', 0, () => {
+      const validPdf = '%PDF-1.4\n1 0 obj\n<< /Type /Page >>\nendobj\nxref\n0 2\n0000000000 65535 f \n0000000009 00000 n \ntrailer\n<< /Size 2 >>\nstartxref\n42\n%%EOF\n'
+      const validBytes = toArrayBuffer(asciiBytes(validPdf))
+      const validCheck = verifyPdfStructure(validBytes)
+      expect(validCheck.ok).assertTrue()
+      const invalidPdf = validPdf.replace('startxref\n42', 'startxref\n43')
+      const invalidCheck = verifyPdfStructure(toArrayBuffer(asciiBytes(invalidPdf)))
+      expect(invalidCheck.ok).assertFalse()
     })
   })
 }

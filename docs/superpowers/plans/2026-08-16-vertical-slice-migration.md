@@ -30,9 +30,10 @@
 - Modify: `entry/src/main/ets/native/NativeEngine.ets`
 - Create: 导出往返测试（`entry/src/ohosTest` 设备用例）
 
-- [ ] PNG 导出：写出真实文件，重新读回校验魔数与字节数，记录 SHA-256。
-- [ ] PDF 导出：写出可被外部解析器打开的文件，记录页数与哈希。
-- [ ] 导出失败必须返回错误，禁止“报告成功但无文件”。
+- [x] 代码链路：PNG/JPEG/WebP 写出后重新读回，校验字节数、源/磁盘 SHA-256 与格式魔数；本地 ArkTS 用例覆盖格式魔数。
+- [x] 代码链路：PDF 使用 UTF-8 字节偏移生成 xref，写出后校验 SHA-256、`startxref`、页对象和页数；本地 ArkTS 用例覆盖 xref 偏移损坏。
+- [x] 导出失败必须返回错误，禁止“报告成功但无文件”。（2026-08-16：写回、哈希、魔数或 PDF 结构任一失败均返回 `ok: false`。）
+- [ ] 设备验收：拉取 PNG/PDF，核对主机 SHA-256，并使用外部 PDF 解析器读取页数。（阻断：本机 `hdc list targets` 为 `[Empty]`。）
 
 ### Task 3: 签名与 HAP 发布件（发布阻断项）
 
@@ -86,6 +87,7 @@
 
 ```text
 pnpm test
+pnpm test:harmony
 pnpm verify:formal
 pnpm verify:release
 pnpm build:harmony

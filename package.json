@@ -6,6 +6,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:harmony": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build-harmony.ps1 -Task test",
     "build": "pnpm build:reference",
     "build:reference": "pnpm -C 原型设计 build",
     "dev": "pnpm -C 原型设计 dev",

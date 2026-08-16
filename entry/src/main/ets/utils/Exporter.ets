@@ -3,8 +3,10 @@ import { serialize, estimateSize } from '../types/FusionSerializer'
 import { Canvas2DRenderer } from './Canvas2DRenderer'
 import { Frame, SceneObject, Layer, HdsDocument } from '../types/SceneTypes'
 import image from '@ohos.multimedia.image'
+import buffer from '@ohos.buffer'
 import { NativeEngine } from '../native/NativeEngine'
 import { FilePersistence } from '../platform/FilePersistence'
+import { copyBytes, verifyImageStructure, verifyPdfStructure } from '../platform/PersistenceTypes'
 
 export type ExportFormat = 'hds' | 'json' | 'png' | 'jpeg' | 'webp' | 'svg' | 'pdf' | 'eps' | 'cdr'
 
@@ -22,6 +24,8 @@ export interface ExportResult {
   message: string
   bytes?: number
   path?: string
+  checksum?: string
+  pages?: number
 }
 
 export interface ExportFormatInfo {
@@ -110,8 +114,28 @@ function pdfEscape(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
 }
 
-/** 生成单页、可被标准 PDF 阅读器打开的矢量 PDF。 */
-function buildSimplePdf(frame: Frame | null): string {
+function utf8Length(text: string): number {
+  return buffer.from(text, 'utf-8').length
+}
+
+/** 按字节计数的 PDF 输出累积器：xref 偏移必须是 UTF-8 字节偏移，含中文时才不会错位。 */
+class PdfByteBuilder {
+  private chunks: string[] = []
+  byteLength: number = 0
+
+  append(chunk: string): void {
+    this.chunks.push(chunk)
+    this.byteLength += utf8Length(chunk)
+  }
+
+  toBuffer(): ArrayBuffer {
+    const encoded = buffer.from(this.chunks.join(''), 'utf-8')
+    return copyBytes(new Uint8Array(encoded.buffer, encoded.byteOffset, encoded.length))
+  }
+}
+
+/** 生成单页、可被标准 PDF 阅读器打开的矢量 PDF；偏移按 UTF-8 字节计算。 */
+function buildSimplePdf(frame: Frame | null): ArrayBuffer {
   const width = frame?.width ?? 595
   const height = frame?.height ?? 842
   const commands: string[] = []
@@ -143,20 +167,21 @@ function buildSimplePdf(frame: Frame | null): string {
   objects.push('<< /Type /Pages /Kids [3 0 R] /Count 1 >>')
   objects.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + width + ' ' + height + '] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>')
   objects.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>')
-  objects.push('<< /Length ' + content.length + ' >>\nstream\n' + content + 'endstream')
-  let pdf = '%PDF-1.4\n%LarkDesign\n'
-  const offsets: number[] = [0]
+  objects.push('<< /Length ' + utf8Length(content) + ' >>\nstream\n' + content + 'endstream')
+  const pdf = new PdfByteBuilder()
+  pdf.append('%PDF-1.4\n%LarkDesign\n')
+  const offsets: number[] = []
   for (let i = 0; i < objects.length; i++) {
-    offsets.push(pdf.length)
-    pdf += (i + 1) + ' 0 obj\n' + objects[i] + '\nendobj\n'
+    offsets.push(pdf.byteLength)
+    pdf.append((i + 1) + ' 0 obj\n' + objects[i] + '\nendobj\n')
   }
-  const xref = pdf.length
-  pdf += 'xref\n0 ' + (objects.length + 1) + '\n0000000000 65535 f \n'
+  const xref = pdf.byteLength
+  pdf.append('xref\n0 ' + (objects.length + 1) + '\n0000000000 65535 f \n')
   for (let i = 1; i < offsets.length; i++) {
-    pdf += offsets[i].toString().padStart(10, '0') + ' 00000 n \n'
+    pdf.append(offsets[i].toString().padStart(10, '0') + ' 00000 n \n')
   }
-  pdf += 'trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n'
-  return pdf
+  pdf.append('trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n')
+  return pdf.toBuffer()
 }
 
 export class Exporter {
@@ -240,7 +265,7 @@ export class Exporter {
     }
   }
 
-  private async exportImage(format: ExportFormat, filename: string, quality: number, dpi: number): Promise<ExportResult> {
+  private async exportImage(format: 'png' | 'jpeg' | 'webp', filename: string, quality: number, dpi: number): Promise<ExportResult> {
     const frame = this.fusionStore.getCurrentFrame()
     if (!frame) {
       return { ok: false, filename, format, message: '没有可导出的画板' }
@@ -276,11 +301,20 @@ export class Exporter {
       return { ok: false, filename, format, message: 'Native 渲染或编码失败' }
     }
     const path = await FilePersistence.writeBytes(filename, data)
+    const verification = await FilePersistence.verifyWrittenFile(path, data)
+    if (!verification.ok || verification.data === null) {
+      return { ok: false, filename, format, message: '导出文件读回校验失败: ' + (verification.reason ?? '未知错误'), path }
+    }
+    const imageCheck = verifyImageStructure(verification.data, format)
+    if (!imageCheck.ok) {
+      return { ok: false, filename, format, message: '导出图片格式校验失败: ' + (imageCheck.reason ?? '未知错误'), path }
+    }
     return {
       ok: true, filename, format,
       message: '已导出 ' + format.toUpperCase() + '，' + dpi + 'DPI',
-      bytes: data.byteLength,
+      bytes: verification.bytes,
       path,
+      checksum: verification.checksum,
     }
   }
 
@@ -310,12 +344,26 @@ export class Exporter {
 
   private async exportPdf(filename: string): Promise<ExportResult> {
     const pdf = buildSimplePdf(this.fusionStore.getCurrentFrame())
-    const path = await FilePersistence.writeText(filename, pdf)
+    const sourceCheck = verifyPdfStructure(pdf)
+    if (!sourceCheck.ok) {
+      return { ok: false, filename, format: 'pdf', message: 'PDF 生成校验失败: ' + (sourceCheck.reason ?? '未知错误') }
+    }
+    const path = await FilePersistence.writeBytes(filename, pdf)
+    const verification = await FilePersistence.verifyWrittenFile(path, pdf)
+    if (!verification.ok || verification.data === null) {
+      return { ok: false, filename, format: 'pdf', message: 'PDF 读回校验失败: ' + (verification.reason ?? '未知错误'), path }
+    }
+    const pdfCheck = verifyPdfStructure(verification.data)
+    if (!pdfCheck.ok) {
+      return { ok: false, filename, format: 'pdf', message: 'PDF 结构校验失败: ' + (pdfCheck.reason ?? '未知错误'), path }
+    }
     return {
       ok: true, filename, format: 'pdf',
-      message: '已导出 PDF',
-      bytes: pdf.length,
+      message: '已导出 PDF，' + pdfCheck.pages + ' 页',
+      bytes: verification.bytes,
       path,
+      checksum: verification.checksum,
+      pages: pdfCheck.pages,
     }
   }
 

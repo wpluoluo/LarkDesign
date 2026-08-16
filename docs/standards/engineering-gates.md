@@ -5,6 +5,7 @@
 | 门禁 | 命令/证据 | 适用范围 | 失败处理 |
 | --- | --- | --- | --- |
 | 共享测试 | `pnpm test` | 每次提交 | 修复后才能合并 |
+| Harmony 本地单元测试 | `pnpm test:harmony` | 修改正式 ArkTS 纯逻辑时 | ArkTS 编译或 Hypium 测试结果失败即阻断 |
 | 参考工程类型检查 | `pnpm typecheck` | 仅参考原型回归 | 不得宣称鸿蒙通过 |
 | 正式结构检查 | `pnpm verify:formal` | 每次提交 | 清理垃圾或修正文档边界 |
 | ArkTS 编译 | `pnpm build:harmony` / DevEco 等价命令 | 正式 PR、发布 | 记录完整编译错误 |
@@ -35,4 +36,4 @@
 
 ## 4. 当前基线
 
-截至 2026-08-15，DevEco Studio `D:\DevEco Studio`、Hvigor/OHOS 插件 `6.22.4`、SDK `6.0.2` 已统一；`pnpm build:harmony` 已完成 Native arm64-v8a/x86_64、ArkTS 编译和 HAP 打包，设备工作区与 Native PixelMap 宿主已验收。签名、完整导出文件读回、重启恢复和剩余 ArkTS 警告仍是发布前门禁，计划见 [开发计划](../superpowers/plans/2026-08-15-harmony-formalization.md)。
+截至 2026-08-16，DevEco Studio `D:\DevEco Studio`、Hvigor/OHOS 插件 `6.22.4`、SDK `6.0.2` 已统一；`pnpm build:harmony` 已完成 Native arm64-v8a/x86_64、ArkTS 编译和未签名 HAP 打包，`pnpm test:harmony` 已接入并编译/生成 ArkTS 本地测试结果。PNG/JPEG/WebP/PDF 的代码链路已在写回后校验长度、SHA-256 和格式结构；签名、真实设备文件读回、外部 PDF 解析与重启恢复仍是发布前阻断项，计划见 [开发计划](../superpowers/plans/2026-08-16-vertical-slice-migration.md)。
