@@ -954,8 +954,8 @@ cd f:\LarkDesign\.arkui-x\android
 
 ## 附录 B：参考文档
 
-- **技术可行性研究报告**：[技术可行性研究报告.md](file:///f:/LarkDesign/原型设计/技术可行性研究报告.md) — 详细的引擎选型、Fusion DOM 设计、AI 中台协议、文件格式规范
-- **全系统架构图**：[全系统完整架构图.svg](file:///f:/LarkDesign/原型设计/全系统完整架构图.svg)
+- **技术可行性研究报告**：[技术可行性研究报告.md](../../原型设计/技术可行性研究报告.md) — 详细的引擎选型、Fusion DOM 设计、AI 中台协议、文件格式规范
+- **全系统架构图**：[全系统完整架构图.svg](../../原型设计/全系统完整架构图.svg)
 - **HarmonyOS 开发文档**：https://developer.harmonyos.com/
 - **ArkUI-X 文档**：https://gitee.com/openharmony/arkui_for_android
 - **Vue 3 文档**：https://vuejs.org/
