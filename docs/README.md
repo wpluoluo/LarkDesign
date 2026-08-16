@@ -15,7 +15,8 @@
 
 ## 开发计划（superpowers/plans/）
 
-- [HarmonyOS 正式化实施计划](superpowers/plans/2026-08-15-harmony-formalization.md) — 当前主计划，含任务进度与验证命令。
+- [垂直切片迁移与发布验收计划](superpowers/plans/2026-08-16-vertical-slice-migration.md) — 当前主计划：平铺目录迁移切片与发布阻断项闭环。
+- [HarmonyOS 正式化实施计划](superpowers/plans/2026-08-15-harmony-formalization.md) — 前一阶段计划，Task 1-4 已完成。
 
 ## 迁移参考（reference/）
 
