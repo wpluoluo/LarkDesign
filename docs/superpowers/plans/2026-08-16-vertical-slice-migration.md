@@ -18,9 +18,9 @@
 - Create: `entry/src/test` 对应持久化用例（LocalUnit）
 - Modify: `docs/standards/engineering-gates.md`（完成后更新基线）
 
-- [ ] 文档保存写入真实沙箱文件（非仅 `AppStorage`），路径与错误码记录在案。
-- [ ] 设备上完成：新建→编辑→保存→杀进程→重启→内容恢复，附日志与文件哈希。
-- [ ] 失败路径（磁盘满/权限拒绝）返回明确错误并提示，不静默丢失。
+- [x] 文档保存写入真实沙箱文件（非仅 `AppStorage`），路径与错误码记录在案。（2026-08-16：`PersistenceTypes` 固定错误码契约，读写日志含 path/bytes/checksum；UTF-8 字节级校验写入完整性）
+- [ ] 设备上完成：新建→编辑→保存→杀进程→重启→内容恢复，附日志与文件哈希。（阻断：本机 `hdc list targets` 为空，无设备/模拟器；代码侧已修复恢复竞态——`init` 不再在异步读取完成前 `pushHistory` 触发自动保存，`read-io`/反序列化失败时禁用自动保存防止覆盖磁盘内容）
+- [x] 失败路径（磁盘满/权限拒绝）返回明确错误并提示，不静默丢失。（2026-08-16：`not-found` 与 `read-io` 分类；`hds_save_status`/`hds_save_error` 上浮 UI；`clearStorage` 真正删除沙箱文件）
 
 ### Task 2: 导出真实文件读回（发布阻断项）
 

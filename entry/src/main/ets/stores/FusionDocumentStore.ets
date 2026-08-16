@@ -16,6 +16,7 @@ import {
 import { FusionDocumentStoreInfo } from './FusionDocumentStoreInfo'
 import { serialize, deserialize, deepClone, estimateSize } from '../types/FusionSerializer'
 import { FilePersistence } from '../platform/FilePersistence'
+import { PersistenceErrorCode } from '../platform/PersistenceTypes'
 
 /** 历史记录条目 */
 export interface HistoryEntry {
@@ -36,6 +37,8 @@ export class FusionDocumentStore {
   private historyIndex: number = -1
   private historyLabels: string[] = []
   private clipboard: SceneObject[] = []
+  /** 沙箱文件恢复完成前禁止自动保存，防止默认空文档覆盖磁盘上的既有内容。 */
+  private restored: boolean = false
 
   private constructor() {
     this.doc = this.createDefaultDocument()
@@ -62,17 +65,17 @@ export class FusionDocumentStore {
     return doc
   }
 
-  /** 初始化 */
+  /** 初始化：先恢复沙箱文件，恢复分支内部决定是否建立历史基线。 */
   init(): void {
     AppStorage.setOrCreate<number>('historyVersion', 0)
     AppStorage.setOrCreate<number>('selectionVersion', 0)
     this.loadFromStorage()
-    this.pushHistory()
   }
 
-  /** 自动保存（防抖 500ms） */
+  /** 自动保存（防抖 500ms）；文件恢复完成前静默跳过。 */
   private autoSaveTimer: number = -1
   private scheduleAutoSave(): void {
+    if (!this.restored) return
     if (this.autoSaveTimer >= 0) {
       clearTimeout(this.autoSaveTimer)
     }
@@ -83,45 +86,77 @@ export class FusionDocumentStore {
 
   /** 保存文档到应用沙箱文件，AppStorage 只保留界面状态。 */
   saveToStorage(): void {
+    let json: string
     try {
-      const json = serialize(this.doc, true)
-      const now = new Date().toISOString()
-      AppStorage.setOrCreate<string>('hds_last_saved', now)
-      AppStorage.setOrCreate<string>('hds_save_status', '保存中')
-      void FilePersistence.writeDocument(json).then(() => {
-        AppStorage.setOrCreate<string>('hds_save_status', '已自动保存')
-      }).catch((error: Error) => {
-        AppStorage.setOrCreate<string>('hds_save_status', '保存失败')
-        console.error('FusionDocumentStore', 'write document failed: ' + error.message)
-      })
+      json = serialize(this.doc, true)
     } catch (e) {
       AppStorage.setOrCreate<string>('hds_save_status', '保存失败')
-      console.error('FusionDocumentStore', 'saveToStorage failed: ' + e)
+      AppStorage.setOrCreate<string>('hds_save_error', 'serialize')
+      console.error('FusionDocumentStore', 'serialize failed: ' + e)
+      return
     }
-  }
-
-  /** 从应用沙箱文件加载文档。 */
-  loadFromStorage(): void {
-    void FilePersistence.readDocument().then((json: string | null) => {
-      if (json === null || json.length === 0) return
-      try {
-        this.doc = deserialize(json)
-        this.historyStack = [JSON.stringify(this.doc)]
-        this.historyLabels = ['恢复文档']
-        this.historyIndex = 0
-        AppStorage.setOrCreate<number>('documentVersion', Date.now())
-        console.info('FusionDocumentStore', 'Loaded document from file, size: ' + estimateSize(this.doc) + 'KB')
-      } catch (error) {
-        console.error('FusionDocumentStore', 'loadFromStorage failed: ' + error)
+    const now = new Date().toISOString()
+    AppStorage.setOrCreate<string>('hds_last_saved', now)
+    AppStorage.setOrCreate<string>('hds_save_status', '保存中')
+    void FilePersistence.writeDocument(json).then((result) => {
+      if (result.ok) {
+        AppStorage.setOrCreate<string>('hds_save_status', '已自动保存')
+        AppStorage.setOrCreate<string>('hds_save_error', '')
+      } else {
+        AppStorage.setOrCreate<string>('hds_save_status', '保存失败')
+        AppStorage.setOrCreate<string>('hds_save_error', result.code ?? 'write-io')
+        console.error('FusionDocumentStore', 'write document failed code=' + result.code + ' path=' + result.path + ' ' + result.message)
       }
-    }).catch((error: Error) => {
-      console.error('FusionDocumentStore', 'read document failed: ' + error.message)
     })
   }
 
-  /** 清除存储的文档 */
+  /**
+   * 从应用沙箱文件恢复文档。
+   * - 成功：应用内容并建立历史基线。
+   * - not-found：首次启动，恢复标记置位后由自动保存建立文件。
+   * - read-io/反序列化失败：保持 restored=false 禁止自动保存，避免覆盖可能可恢复的磁盘内容。
+   */
+  loadFromStorage(): void {
+    void FilePersistence.readDocument().then((result) => {
+      if (result.ok && result.json !== null && result.json.length > 0) {
+        try {
+          this.doc = deserialize(result.json)
+          this.historyStack = [JSON.stringify(this.doc)]
+          this.historyLabels = ['恢复文档']
+          this.historyIndex = 0
+          this.restored = true
+          AppStorage.setOrCreate<number>('documentVersion', Date.now())
+          AppStorage.setOrCreate<string>('hds_save_status', '已恢复')
+          AppStorage.setOrCreate<string>('hds_save_error', '')
+          console.info('FusionDocumentStore', 'restored document path=' + result.path + ' size=' + estimateSize(this.doc) + 'KB')
+        } catch (error) {
+          AppStorage.setOrCreate<string>('hds_save_status', '恢复失败')
+          AppStorage.setOrCreate<string>('hds_save_error', 'serialize')
+          console.error('FusionDocumentStore', 'deserialize failed path=' + result.path + '，已保留磁盘文件等待处理: ' + error)
+        }
+      } else if (result.code === 'not-found') {
+        this.restored = true
+        AppStorage.setOrCreate<string>('hds_save_status', '新文档')
+        this.pushHistory()
+      } else {
+        const code: PersistenceErrorCode = result.code ?? 'read-io'
+        AppStorage.setOrCreate<string>('hds_save_status', '恢复失败')
+        AppStorage.setOrCreate<string>('hds_save_error', code)
+        console.error('FusionDocumentStore', 'read document failed code=' + code + ' path=' + result.path + ' ' + result.message)
+      }
+    })
+  }
+
+  /** 清除存储的文档：同时删除沙箱文件，否则重启后会恢复旧内容。 */
   clearStorage(): void {
     AppStorage.delete('hds_last_saved')
+    void FilePersistence.deleteDocument().then((result) => {
+      AppStorage.setOrCreate<string>('hds_save_status', result.ok ? '已清除' : '清除失败')
+      if (!result.ok) {
+        AppStorage.setOrCreate<string>('hds_save_error', result.code ?? 'delete-io')
+        console.error('FusionDocumentStore', 'delete document failed code=' + result.code + ' path=' + result.path + ' ' + result.message)
+      }
+    })
   }
 
   /** 获取文档 */
