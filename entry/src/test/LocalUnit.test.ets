@@ -11,7 +11,9 @@ import {
   copyBytes,
   matchesMagic,
   verifyImageStructure,
+  verifyJsonText,
   verifyPdfStructure,
+  verifySvgText,
 } from '../main/ets/platform/PersistenceTypes'
 
 function asciiBytes(text: string): number[] {
@@ -95,6 +97,20 @@ export default function localUnitTest() {
       expect(webpCheck.ok).assertTrue()
       expect(mismatchedCheck.ok).assertFalse()
       expect(invalidPngCheck.ok).assertFalse()
+    })
+    it('jsonTextStructureRejectsMalformedText', 0, () => {
+      const validCheck = verifyJsonText('{"version":"3.0","scene":{}}')
+      const invalidCheck = verifyJsonText('{"version":')
+      expect(validCheck.ok).assertTrue()
+      expect(invalidCheck.ok).assertFalse()
+    })
+    it('svgTextStructureRequiresEnvelope', 0, () => {
+      const validCheck = verifySvgText('<?xml version="1.0" encoding="UTF-8"?>\n<svg></svg>')
+      const missingDeclaration = verifySvgText('<svg></svg>')
+      const missingEndTag = verifySvgText('<?xml version="1.0"?><svg>')
+      expect(validCheck.ok).assertTrue()
+      expect(missingDeclaration.ok).assertFalse()
+      expect(missingEndTag.ok).assertFalse()
     })
     it('pdfStructureRequiresValidCrossReferenceOffset', 0, () => {
       const validPdf = '%PDF-1.4\n1 0 obj\n<< /Type /Page >>\nendobj\nxref\n0 2\n0000000000 65535 f \n0000000009 00000 n \ntrailer\n<< /Size 2 >>\nstartxref\n42\n%%EOF\n'

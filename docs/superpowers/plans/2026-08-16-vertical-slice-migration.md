@@ -32,6 +32,7 @@
 
 - [x] 代码链路：PNG/JPEG/WebP 写出后重新读回，校验字节数、源/磁盘 SHA-256 与格式魔数；本地 ArkTS 用例覆盖格式魔数。
 - [x] 代码链路：PDF 使用 UTF-8 字节偏移生成 xref，写出后校验 SHA-256、`startxref`、页对象和页数；本地 ArkTS 用例覆盖 xref 偏移损坏。
+- [x] 代码链路：HDS/JSON/SVG 写出后重新读回，校验文本一致性、JSON/SVG 结构与精确 UTF-8 字节 SHA-256；本地 ArkTS 用例覆盖非法 JSON、缺失 XML 声明和 SVG 闭合标签。（2026-08-19）
 - [x] 导出失败必须返回错误，禁止“报告成功但无文件”。（2026-08-16：写回、哈希、魔数或 PDF 结构任一失败均返回 `ok: false`。）
 - [ ] 设备验收：拉取 PNG/PDF，核对主机 SHA-256，并使用外部 PDF 解析器读取页数。（阻断：本机 `hdc list targets` 为 `[Empty]`。）
 

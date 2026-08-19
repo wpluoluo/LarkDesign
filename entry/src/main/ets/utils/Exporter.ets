@@ -6,7 +6,13 @@ import image from '@ohos.multimedia.image'
 import buffer from '@ohos.buffer'
 import { NativeEngine } from '../native/NativeEngine'
 import { FilePersistence } from '../platform/FilePersistence'
-import { copyBytes, verifyImageStructure, verifyPdfStructure } from '../platform/PersistenceTypes'
+import {
+  copyBytes,
+  verifyImageStructure,
+  verifyJsonText,
+  verifyPdfStructure,
+  verifySvgText,
+} from '../platform/PersistenceTypes'
 
 export type ExportFormat = 'hds' | 'json' | 'png' | 'jpeg' | 'webp' | 'svg' | 'pdf' | 'eps' | 'cdr'
 
@@ -253,15 +259,26 @@ export class Exporter {
   private async exportJson(format: ExportFormat, filename: string): Promise<ExportResult> {
     const doc = this.fusionStore.getDocument()
     const json = serialize(doc, format === 'json')
-    const bytes = json.length
     const path = await FilePersistence.writeText(filename, json)
+    const readBack = await FilePersistence.readFileText(path)
+    if (readBack !== json) {
+      return { ok: false, filename, format, message: '读回内容与源不一致', path }
+    }
+    const jsonCheck = verifyJsonText(readBack)
+    if (!jsonCheck.ok) {
+      return { ok: false, filename, format, message: '导出校验失败: ' + (jsonCheck.reason ?? '未知错误'), path }
+    }
+    const encoded = buffer.from(readBack, 'utf-8')
+    const data = copyBytes(new Uint8Array(encoded.buffer, encoded.byteOffset, encoded.length))
+    const checksum = await FilePersistence.sha256Hex(data)
     return {
       ok: true,
       filename,
       format,
       message: '已导出 ' + format.toUpperCase() + '，' + estimateSize(this.fusionStore.getDocument()) + 'KB',
-      bytes,
+      bytes: data.byteLength,
       path,
+      checksum,
     }
   }
 
@@ -334,11 +351,23 @@ export class Exporter {
       layersXml.join('\n') + '\n' +
       '</svg>'
     const path = await FilePersistence.writeText(filename, svg)
+    const readBack = await FilePersistence.readFileText(path)
+    if (readBack !== svg) {
+      return { ok: false, filename, format: 'svg', message: '读回内容与源不一致', path }
+    }
+    const svgCheck = verifySvgText(readBack)
+    if (!svgCheck.ok) {
+      return { ok: false, filename, format: 'svg', message: '导出校验失败: ' + (svgCheck.reason ?? '未知错误'), path }
+    }
+    const encoded = buffer.from(readBack, 'utf-8')
+    const data = copyBytes(new Uint8Array(encoded.buffer, encoded.byteOffset, encoded.length))
+    const checksum = await FilePersistence.sha256Hex(data)
     return {
       ok: true, filename, format: 'svg',
       message: '已导出 SVG · ' + layersXml.length + ' 层',
-      bytes: svg.length,
+      bytes: data.byteLength,
       path,
+      checksum,
     }
   }
 

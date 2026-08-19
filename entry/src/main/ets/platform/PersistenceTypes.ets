@@ -145,6 +145,33 @@ export function verifyImageStructure(data: ArrayBuffer, format: ImageExportForma
     : { ok: false, reason: '缺少 WebP RIFF/WEBP 文件头' }
 }
 
+export interface TextCheckResult {
+  ok: boolean
+  reason: string | null
+}
+
+/** JSON 文本结构校验：读回内容必须能被完整解析。 */
+export function verifyJsonText(text: string): TextCheckResult {
+  try {
+    JSON.parse(text)
+    return { ok: true, reason: null }
+  } catch (error) {
+    return { ok: false, reason: 'JSON 解析失败: ' + error }
+  }
+}
+
+/** SVG 文本结构校验：必须有 XML 声明头与 </svg> 闭合标签。 */
+export function verifySvgText(text: string): TextCheckResult {
+  const trimmed = text.trim()
+  if (!trimmed.startsWith('<?xml')) {
+    return { ok: false, reason: '缺少 <?xml 声明' }
+  }
+  if (!trimmed.endsWith('</svg>')) {
+    return { ok: false, reason: '缺少 </svg> 闭合标签' }
+  }
+  return { ok: true, reason: null }
+}
+
 function lastIndexOfAscii(bytes: Uint8Array, needle: string): number {
   const n = needle.length
   for (let i = bytes.length - n; i >= 0; i--) {
