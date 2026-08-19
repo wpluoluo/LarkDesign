@@ -19,7 +19,7 @@ import { ColorBar } from '../features/color/components/ColorBar'
 import { DocumentToolbar } from './DocumentToolbar'
 import { ColorSystem } from '../features/color/components/ColorSystem'
 import { ComponentLibrary } from './ComponentLibrary'
-import { AIAssistant } from './AIAssistant'
+import { AIAssistant } from '../features/ai/components/AIAssistant'
 import { CanvasExportPanel } from './CanvasExportPanel'
 import { IconCharToken as Icon } from '../tokens/IconToken'
 

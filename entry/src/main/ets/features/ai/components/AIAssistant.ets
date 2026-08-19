@@ -4,10 +4,10 @@
  * 对应原型 src/components/AIAssistant.vue
  * AI 辅助设计对话界面，连接 AiAgent 后端引擎
  */
-import { ColorToken } from '../tokens/DesignTokens'
-import { FontWeightConstant, FontSizeToken, SpacingToken, RadiusToken, ShadowToken } from '../tokens/DesignTokens'
-import { IconCharToken as Icon } from '../tokens/IconToken'
-import { AiAgent, ChatMessage } from '../utils/AiAgent'
+import { ColorToken } from '../../../tokens/DesignTokens'
+import { FontWeightConstant, FontSizeToken, SpacingToken, RadiusToken, ShadowToken } from '../../../tokens/DesignTokens'
+import { IconCharToken as Icon } from '../../../tokens/IconToken'
+import { AiAgent, ChatMessage } from '../runtime/AiAgent'
 
 @Component
 export struct AIAssistant {

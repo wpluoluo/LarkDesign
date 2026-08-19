@@ -30,6 +30,7 @@ import { hexToCmyk, hexToHsl, hexToRgb, hslToHex, isValidHex, normalizeHex, rgbT
 import { ThemeStore } from '../main/ets/features/workspace/state/ThemeStore'
 import { ToastStore } from '../main/ets/features/common/state/ToastStore'
 import { BYOKStore } from '../main/ets/features/ai/state/BYOKStore'
+import { findTool, getToolCount } from '../main/ets/features/ai/runtime/MCPRegistry'
 
 function asciiBytes(text: string): number[] {
   const result: number[] = []
@@ -235,6 +236,16 @@ export default function localUnitTest() {
       expect(hslToHex(hsl.h, hsl.s, hsl.l)).assertEqual('#ff0000')
       expect(isValidHex('#3AC487')).assertTrue()
       expect(normalizeHex('#3ac487')).assertEqual('#3AC487')
+    })
+  })
+
+  describe('AiFeatureSliceTest', () => {
+    it('aiRuntimeListsExecutableToolsWithoutPseudoExport', 0, () => {
+      const canvasInfo = findTool('canvas.info')
+
+      expect(canvasInfo?.name).assertEqual('canvas.info')
+      expect(findTool('export.render')).assertNull()
+      expect(getToolCount() > 0).assertTrue()
     })
   })
 }

@@ -3,10 +3,11 @@
  *
  * 对应原型 src/components/Inspector.vue 的 AI Tab 部分
  */
-import { ColorToken } from '../tokens/DesignTokens'
-import { FontWeightConstant } from '../tokens/DesignTokens'
-import { IconCharToken as Icon } from '../tokens/IconToken'
-import { BYOKStore } from '../features/ai/state/BYOKStore'
+import { ColorToken } from '../../../tokens/DesignTokens'
+import { FontWeightConstant } from '../../../tokens/DesignTokens'
+import { IconCharToken as Icon } from '../../../tokens/IconToken'
+import { BYOKStore } from '../state/BYOKStore'
+import { ByokConfigModal } from './ByokConfigModal'
 
 /** AI 对话消息 */
 interface AiMessage {
@@ -371,9 +372,17 @@ export struct InspectorAiTab {
       .width('100%')
       .border({ width: { top: 1 }, color: { top: ColorToken.border } })
       .backgroundColor(ColorToken.white)
-    }
+    ByokConfigModal({
+      visible: this.showByokModal,
+      onClose: (): void => { this.showByokModal = false },
+      onSaved: (): void => {
+        this.byokConfigured = this.byokStore.isConfigured
+        this.byokModelId = this.byokStore.config.modelId
+      },
+    })
     .width('100%')
     .height('100%')
+    }
   }
 
   private async onAiSend(): Promise<void> {

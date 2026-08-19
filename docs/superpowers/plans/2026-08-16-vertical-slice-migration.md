@@ -78,6 +78,7 @@
 
 - [ ] 每个特性目录一次迁移+一次设备冒烟，禁止一次性大搬迁。
 - [x] 颜色切片：`ColorBar`、颜色选择器和颜色系统组件以及颜色换算工具迁入 `features/color/`；由工作区和检查器通过特性入口引用，新增正式门禁禁止向旧平铺目录新增文件。（2026-08-19）
+- [x] AI 切片：BYOK 配置弹窗、AI 助手/检查器面板、`AiAgent` 与 `MCPRegistry` 迁入 `features/ai/`；配置弹窗接入检查器，移除会伪报导出成功的 `export.render` 工具。（2026-08-19）
 - [ ] 迁移完成后 `entry/src/main/ets/` 顶层只剩 `app/domain/features/platform/native` 四类正式目录与 README。
 - [x] `verify:formal` 增加规则：新提交不得再向平铺目录添加文件。（2026-08-19）
 

@@ -4,14 +4,16 @@
  * 对应原型 src/components/ByokConfigModal.vue
  * 配置外部 AI 服务的 API Key 和端点
  */
-import { ColorToken } from '../tokens/DesignTokens'
-import { FontWeightConstant, FontSizeToken, SpacingToken, RadiusToken, ShadowToken } from '../tokens/DesignTokens'
-import { IconCharToken as Icon } from '../tokens/IconToken'
-import { BYOKStore } from '../features/ai/state/BYOKStore'
+import { ColorToken } from '../../../tokens/DesignTokens'
+import { FontWeightConstant, FontSizeToken, SpacingToken, RadiusToken, ShadowToken } from '../../../tokens/DesignTokens'
+import { IconCharToken as Icon } from '../../../tokens/IconToken'
+import { BYOKStore } from '../state/BYOKStore'
 
 @Component
 export struct ByokConfigModal {
-  @State isVisible: boolean = false
+  @Prop visible: boolean = false
+  onClose: () => void = () => {}
+  onSaved: () => void = () => {}
   @State provider: string = 'openai'
   @State apiKey: string = ''
   @State model: string = 'gpt-4o'
@@ -21,21 +23,20 @@ export struct ByokConfigModal {
 
   private byokStore: BYOKStore = BYOKStore.getInstance()
 
-  show(): void {
+  aboutToAppear(): void {
     const config = this.byokStore.config
     this.provider = config.provider
     this.apiKey = config.apiKey
     this.model = config.modelId
     this.endpoint = config.baseUrl
-    this.isVisible = true
   }
 
   hide(): void {
-    this.isVisible = false
+    this.onClose()
   }
 
   build(): void {
-    if (this.isVisible) {
+    if (this.visible) {
       Stack({ alignContent: Alignment.Center }) {
         // 遮罩
         Column()
@@ -178,7 +179,7 @@ export struct ByokConfigModal {
             .backgroundColor(ColorToken.white)
             .border({ width: 1, color: ColorToken.border })
             .justifyContent(FlexAlign.Center)
-            .alignItems(HorizontalAlign.Center)
+            .alignItems(VerticalAlign.Center)
             .margin({ right: 8 })
             .onClick(() => { this.hide() })
 
@@ -193,7 +194,7 @@ export struct ByokConfigModal {
             .borderRadius(6)
             .backgroundColor(ColorToken.primary)
             .justifyContent(FlexAlign.Center)
-            .alignItems(HorizontalAlign.Center)
+            .alignItems(VerticalAlign.Center)
             .onHover((isHover: boolean) => { this.hoveredSave = isHover })
             .onClick(() => {
               this.byokStore.updateConfig({
@@ -203,7 +204,8 @@ export struct ByokConfigModal {
                 baseUrl: this.endpoint,
               })
               this.byokStore.save()
-              this.hide()
+              this.onSaved()
+              this.onClose()
             })
           }
           .width('100%')

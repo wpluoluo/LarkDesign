@@ -4,9 +4,9 @@
  * 对应原型 src/ai/mcp.ts
  * 轻量级 MCP 风格工具注册中心，让 AI Agent 通过工具调用操作 Fusion DOM。
  */
-import { FusionDocumentStore } from '../domain/FusionDocumentStore'
-import { SceneObject, Transform, BlendMode, NodeType, HdsDocument, Layer } from '../domain/SceneTypes'
-import { findObjectInDoc, addLayer } from '../domain/FusionOps'
+import { FusionDocumentStore } from '../../../domain/FusionDocumentStore'
+import { SceneObject, Transform, BlendMode, NodeType, HdsDocument, Layer } from '../../../domain/SceneTypes'
+import { findObjectInDoc, addLayer } from '../../../domain/FusionOps'
 
 export interface ToolResult {
   ok: boolean
@@ -307,15 +307,6 @@ register('selection.list', '获取当前选中的对象 ID 列表。', '{}',
       ids.push(sel[i].id)
     }
     const r: ToolResult = { ok: true, data: JSON.stringify(ids), message: '已获取选中列表' }
-    return r
-  })
-
-/* ═════════ Export ═════════ */
-
-register('export.render', '渲染画布并导出为指定格式。format 可为 png/jpeg/json。', '{"type":"object","properties":{"format":{"type":"string","enum":["png","jpeg","json"]}},"required":["format"]}',
-  (args: Record<string, string>, _store: FusionDocumentStore): ToolResult => {
-    const format = args['format'] ?? 'png'
-    const r: ToolResult = { ok: true, message: `已导出 ${format.toUpperCase()}（演示）`, data: '{"format":"' + format + '"}' }
     return r
   })
 

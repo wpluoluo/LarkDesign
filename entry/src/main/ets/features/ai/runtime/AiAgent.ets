@@ -5,8 +5,8 @@
  * 实现 OpenAI 兼容的 chat/completions 调用循环，支持 tool calling。
  * 未配置 BYOK 时降级为演示模式：根据关键词触发预设工具调用。
  */
-import { BYOKStore } from '../features/ai/state/BYOKStore'
-import { FusionDocumentStore } from '../domain/FusionDocumentStore'
+import { BYOKStore } from '../state/BYOKStore'
+import { FusionDocumentStore } from '../../../domain/FusionDocumentStore'
 import { getToolAt, getToolCount, callTool, createToolCallLog, ToolResult, ToolDef } from './MCPRegistry'
 import http from '@ohos.net.http'
 

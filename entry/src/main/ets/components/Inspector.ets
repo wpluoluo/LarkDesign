@@ -12,7 +12,7 @@ import { ColorPickerPopover } from '../features/color/components/ColorPickerPopo
 import { InspectorDesignTab } from './InspectorDesignTab'
 import { InspectorExportTab } from './InspectorExportTab'
 import { InspectorSettingsTab } from './InspectorSettingsTab'
-import { InspectorAiTab } from './InspectorAiTab'
+import { InspectorAiTab } from '../features/ai/components/InspectorAiTab'
 import { WindowSettingsDialog } from './WindowSettingsDialog'
 
 @Component
