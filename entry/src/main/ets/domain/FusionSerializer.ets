@@ -13,7 +13,7 @@ import {
   Transform, DocumentMetadata, FrameType, ShapeKind, BlendMode,
   ColorSpace, Unit, NodeType, BaseNode, Frame, LayerEffect,
   Mask, Gradient, InfiniteCanvasConfig
-} from '../types/SceneTypes'
+} from './SceneTypes'
 
 export const HDS_FORMAT_VERSION = '3.0'
 

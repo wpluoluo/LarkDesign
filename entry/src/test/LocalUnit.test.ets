@@ -15,6 +15,10 @@ import {
   verifyPdfStructure,
   verifySvgText,
 } from '../main/ets/platform/PersistenceTypes'
+import { HdsDocument } from '../main/ets/domain/SceneTypes'
+import { createScene, createShapeObject } from '../main/ets/domain/FusionFactory'
+import { addFrame, addLayer, addObjectToLayer, getFramesBoundingBox } from '../main/ets/domain/FusionOps'
+import { deserialize, serialize } from '../main/ets/domain/FusionSerializer'
 
 function asciiBytes(text: string): number[] {
   const result: number[] = []
@@ -120,6 +124,47 @@ export default function localUnitTest() {
       const invalidPdf = validPdf.replace('startxref\n42', 'startxref\n43')
       const invalidCheck = verifyPdfStructure(toArrayBuffer(asciiBytes(invalidPdf)))
       expect(invalidCheck.ok).assertFalse()
+    })
+  })
+
+  describe('DomainPublicEntryTest', () => {
+    it('domainEntriesRoundTripDocumentContent', 0, () => {
+      const doc: HdsDocument = {
+        version: '3.0',
+        scene: createScene({ name: '迁移验证文档' }),
+        metadata: {
+          createdAt: '2026-08-19T00:00:00.000Z',
+          modifiedAt: '2026-08-19T00:00:00.000Z',
+        },
+      }
+      const layer = addLayer(doc, '正文')
+      const shape = createShapeObject({ name: '矩形', x: 12, y: 24, width: 80, height: 40 })
+      expect(addObjectToLayer(doc, layer.id, shape)).assertTrue()
+
+      const restored = deserialize(serialize(doc))
+      expect(restored.scene.name).assertEqual('迁移验证文档')
+      expect(restored.scene.children[0].name).assertEqual('正文')
+      expect(restored.scene.children[0].objects[0].name).assertEqual('矩形')
+      expect(restored.scene.children[0].objects[0].transform.x).assertEqual(12)
+    })
+
+    it('domainOperationsCalculateFrameBoundsAndPlacement', 0, () => {
+      const doc: HdsDocument = {
+        version: '3.0',
+        scene: createScene(),
+        metadata: {
+          createdAt: '2026-08-19T00:00:00.000Z',
+          modifiedAt: '2026-08-19T00:00:00.000Z',
+        },
+      }
+      const first = addFrame(doc, 'single', '首页', 10, 20)
+      const second = addFrame(doc, 'single', '第二页')
+      const bounds = getFramesBoundingBox(doc)
+
+      expect(second.x).assertEqual(first.x + first.width + 80)
+      expect(second.y).assertEqual(first.y)
+      expect(bounds?.minX).assertEqual(10)
+      expect(bounds?.maxX).assertEqual(second.x + second.width)
     })
   })
 }

@@ -15,7 +15,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { FontWeightConstant, FontSizeToken, RadiusToken, ShadowToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { Frame, SceneObject, Layer } from '../types/SceneTypes'
+import { Frame, SceneObject, Layer } from '../domain/SceneTypes'
 import { NativeCanvasPreview } from './NativeCanvasPreview'
 
 @Component

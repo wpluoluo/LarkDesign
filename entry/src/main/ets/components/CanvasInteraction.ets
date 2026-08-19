@@ -12,7 +12,7 @@
  *  - 文本编辑状态管理
  *  - 命中检测（考虑旋转）
  */
-import { Frame, SceneObject, Transform, Point, Size, Rect } from '../types/SceneTypes'
+import { Frame, SceneObject, Transform, Point, Size, Rect } from '../domain/SceneTypes'
 import { ObjectWithLayer, CanvasRenderer } from './CanvasRenderer'
 import { InfiniteCanvas } from './InfiniteCanvas'
 

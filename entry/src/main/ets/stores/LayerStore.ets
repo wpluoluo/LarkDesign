@@ -3,9 +3,9 @@
  *
  * 对应原型 src/stores/layer.ts
  */
-import { SceneObject, Layer } from '../types/SceneTypes'
+import { SceneObject, Layer } from '../domain/SceneTypes'
 import { FusionDocumentStore } from './FusionDocumentStore'
-import { listAllObjects, findObjectInDoc, FindResult } from '../types/FusionOps'
+import { listAllObjects, findObjectInDoc, FindResult } from '../domain/FusionOps'
 
 export class LayerStore {
   private static instance: LayerStore

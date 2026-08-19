@@ -9,7 +9,7 @@ import { IconCharToken as Icon } from '../tokens/IconToken'
 import { CanvasExportView, CanvasExportSettings } from './CanvasExportView'
 import { FusionDocumentStore } from '../stores/FusionDocumentStore'
 import { Exporter, ExportFormat } from '../utils/Exporter'
-import { Frame } from '../types/SceneTypes'
+import { Frame } from '../domain/SceneTypes'
 
 @Component
 export struct CanvasExportPanel {

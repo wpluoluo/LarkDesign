@@ -6,8 +6,8 @@
 import { ColorToken, FontWeightConstant, ShadowToken, ZIndexToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
 import { FusionDocumentStore } from '../stores/FusionDocumentStore'
-import { findObjectInDoc } from '../types/FusionOps'
-import { LayerEffect } from '../types/SceneTypes'
+import { findObjectInDoc } from '../domain/FusionOps'
+import { LayerEffect } from '../domain/SceneTypes'
 
 interface FxItem {
   id: string

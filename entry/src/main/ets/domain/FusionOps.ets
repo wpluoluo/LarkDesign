@@ -4,8 +4,8 @@
  * 对应原型 src/fusion/ops.ts
  * 提供 Scene/Layer/Object/Frame 的增删改查。
  */
-import { HdsDocument, Layer, Frame, FrameType, Scene, SceneObject, Page, Transform, Mask, LayerEffect, InfiniteCanvasConfig } from '../types/SceneTypes'
-import { createLayer, createFrame, createPage, genId, CreateFrameParams } from '../types/FusionFactory'
+import { HdsDocument, Layer, Frame, FrameType, Scene, SceneObject, Page, Transform, Mask, LayerEffect, InfiniteCanvasConfig } from './SceneTypes'
+import { createLayer, createFrame, createPage, genId, CreateFrameParams } from './FusionFactory'
 
 /** 深克隆 */
 export function deepClone<T>(value: T): T {

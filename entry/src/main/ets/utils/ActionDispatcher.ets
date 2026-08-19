@@ -1,7 +1,7 @@
 import { FusionDocumentStore } from '../stores/FusionDocumentStore'
 import { Exporter, ExportFormat } from './Exporter'
-import { SceneObject } from '../types/SceneTypes'
-import { addLayer } from '../types/FusionOps'
+import { SceneObject } from '../domain/SceneTypes'
+import { addLayer } from '../domain/FusionOps'
 
 export class ActionDispatcher {
   private static instance: ActionDispatcher

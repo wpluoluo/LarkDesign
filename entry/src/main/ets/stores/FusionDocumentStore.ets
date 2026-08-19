@@ -4,17 +4,17 @@
  * 对应原型 src/stores/fusionDocument.ts
  * 使用 AppStorage 实现全局响应式，配合 @StorageLink 在组件中订阅。
  */
-import { HdsDocument, Scene, Layer, Frame, SceneObject, Transform, LayerEffect, BlendMode } from '../types/SceneTypes'
-import { createScene, createLayer, genId } from '../types/FusionFactory'
+import { HdsDocument, Scene, Layer, Frame, SceneObject, Transform, LayerEffect, BlendMode } from '../domain/SceneTypes'
+import { createScene, createLayer, genId } from '../domain/FusionFactory'
 import {
   getCurrentFrame, getCurrentLayers, getCurrentPage,
   addFrame, removeFrame, duplicateFrame, findFrameById, updateFrame,
   addLayer, findLayerById, removeLayer,
   findObjectInDoc, addObjectToLayer, updateObjectTransform,
   listAllObjects, getFramesBoundingBox, fitViewportToFrames,
-} from '../types/FusionOps'
+} from '../domain/FusionOps'
 import { FusionDocumentStoreInfo } from './FusionDocumentStoreInfo'
-import { serialize, deserialize, deepClone, estimateSize } from '../types/FusionSerializer'
+import { serialize, deserialize, deepClone, estimateSize } from '../domain/FusionSerializer'
 import { FilePersistence } from '../platform/FilePersistence'
 import { PersistenceErrorCode } from '../platform/PersistenceTypes'
 

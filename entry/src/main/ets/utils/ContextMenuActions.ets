@@ -1,7 +1,7 @@
 import { FusionDocumentStore } from '../stores/FusionDocumentStore'
-import { SceneObject } from '../types/SceneTypes'
-import { findLayerById, findObjectInDoc, addMaskToLayer } from '../types/FusionOps'
-import { Mask } from '../types/SceneTypes'
+import { SceneObject } from '../domain/SceneTypes'
+import { findLayerById, findObjectInDoc, addMaskToLayer } from '../domain/FusionOps'
+import { Mask } from '../domain/SceneTypes'
 
 export class ContextMenuActions {
   private static instance: ContextMenuActions

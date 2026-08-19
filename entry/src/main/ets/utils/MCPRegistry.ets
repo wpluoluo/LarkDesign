@@ -5,8 +5,8 @@
  * 轻量级 MCP 风格工具注册中心，让 AI Agent 通过工具调用操作 Fusion DOM。
  */
 import { FusionDocumentStore } from '../stores/FusionDocumentStore'
-import { SceneObject, Transform, BlendMode, NodeType, HdsDocument, Layer } from '../types/SceneTypes'
-import { findObjectInDoc, addLayer } from '../types/FusionOps'
+import { SceneObject, Transform, BlendMode, NodeType, HdsDocument, Layer } from '../domain/SceneTypes'
+import { findObjectInDoc, addLayer } from '../domain/FusionOps'
 
 export interface ToolResult {
   ok: boolean

@@ -5,7 +5,7 @@
  * 使用 ArkUI CanvasRenderingContext2D API 实现 Fusion DOM 的栅格化渲染。
  * 支持：图层合成（混合模式/不透明度）、蒙版（raster/vector）、效果链（投影/发光/叠加）
  */
-import { Frame, Layer, SceneObject, Transform, LayerEffect, Mask } from '../types/SceneTypes'
+import { Frame, Layer, SceneObject, Transform, LayerEffect, Mask } from '../domain/SceneTypes'
 
 class BlendModeMap {
   get(key: string): string {

@@ -1,5 +1,5 @@
-import { SceneObject, Frame, ShapeKind } from '../types/SceneTypes'
-import { createShapeObject, createTextObject } from '../types/FusionFactory'
+import { SceneObject, Frame, ShapeKind } from '../domain/SceneTypes'
+import { createShapeObject, createTextObject } from '../domain/FusionFactory'
 import { CanvasInteraction } from '../components/CanvasInteraction'
 import { FusionDocumentStore } from '../stores/FusionDocumentStore'
 

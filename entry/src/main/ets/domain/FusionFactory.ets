@@ -2,7 +2,7 @@ import {
   BlendMode, Transform, Scene, Layer, Page, Frame, FrameType,
   InfiniteCanvasConfig, SceneObject, Mask,
   LayerEffect, EffectParams, Gradient, Unit, ColorSpace, ShapeKind,
-} from '../types/SceneTypes'
+} from './SceneTypes'
 
 export interface CreateNodeParams {
   name?: string

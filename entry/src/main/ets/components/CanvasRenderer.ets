@@ -14,7 +14,7 @@
  *  - @Builder 渲染方法仍保留在 CanvasStage 组件中
  *  - 本类只提供数据计算与查询，不涉及 ArkUI UI 树
  */
-import { Frame, Layer, SceneObject, Transform, ShapeKind, Size } from '../types/SceneTypes'
+import { Frame, Layer, SceneObject, Transform, ShapeKind, Size } from '../domain/SceneTypes'
 
 /** 画布对象与图层ID的映射 */
 export interface ObjectWithLayer {

@@ -48,13 +48,13 @@
 ### Task 4: 领域切片迁移（types → domain）
 
 **Files:**
-- Move: `entry/src/main/ets/types/SceneTypes.ets`、`FusionSerializer.ets`、`FusionOps.ets`、`FusionFactory.ets` → `entry/src/main/ets/domain/`
-- Move: `entry/src/main/ets/types/liblark_engine.d.ts` → `entry/src/main/ets/native/`
-- Modify: `docs/standards/native-bridge.md`（d.ts 新路径）
-- Delete: `entry/src/main/ets/types/`（全部迁空后）
+- Moved: `entry/src/main/ets/domain/SceneTypes.ets`、`FusionSerializer.ets`、`FusionOps.ets`、`FusionFactory.ets`
+- Moved: `entry/src/main/ets/native/liblark_engine.d.ts`
+- Modified: `docs/standards/native-bridge.md`（d.ts 新路径）
+- Deleted: `entry/src/main/ets/types/`
 
-- [ ] 序列化/算法用例补入 `shared/tests` 或 `entry/src/test`，先测试后迁移。
-- [ ] 迁移后 ArkTS 编译、`pnpm test`、`pnpm verify:formal` 全绿，再删除旧 `types/` 目录。
+- [x] 序列化/算法用例补入 `entry/src/test`，先测试后迁移。（2026-08-19：先由 `domain/` 入口导入确认模块缺失编译失败，再覆盖文档往返、图层/对象操作与画板边界算法。）
+- [x] 迁移后 ArkTS 编译、`pnpm test`、`pnpm verify:formal` 全绿，再删除旧 `types/` 目录。（2026-08-19）
 
 ### Task 5: 状态切片迁移（stores → domain / features）
 

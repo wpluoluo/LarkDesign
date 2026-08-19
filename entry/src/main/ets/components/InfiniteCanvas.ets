@@ -14,7 +14,7 @@
  *  - 通过 ViewportCallback 回调通知 CanvasStage 更新 @State
  *  - 响应式状态（zoom / panX / panY）仍由 CanvasStage 的 @State 持有
  */
-import { Frame, Point, FitToFramesResult } from '../types/SceneTypes'
+import { Frame, Point, FitToFramesResult } from '../domain/SceneTypes'
 
 /** 视口变化回调（由 CanvasStage 实现，用于同步 @State） */
 export interface ViewportCallback {

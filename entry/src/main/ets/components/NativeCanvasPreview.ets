@@ -1,5 +1,5 @@
 /** 正式画布的 NativeDrawing/Skia 像素预览。编辑手柄仍由 ArkUI 覆盖层负责。 */
-import { Frame } from '../types/SceneTypes'
+import { Frame } from '../domain/SceneTypes'
 import { NativeEngine } from '../native/NativeEngine'
 
 @Component

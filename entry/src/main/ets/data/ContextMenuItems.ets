@@ -1,4 +1,4 @@
-import { ContextMenuItem } from '../types/SceneTypes'
+import { ContextMenuItem } from '../domain/SceneTypes'
 
 function mergeItems(a: ContextMenuItem[], b: ContextMenuItem[]): ContextMenuItem[] {
   const result: ContextMenuItem[] = []

@@ -4,7 +4,7 @@
  */
 import nativeEngine from 'liblark_engine.so'
 import image from '@ohos.multimedia.image'
-import { Frame, Layer, SceneObject } from '../types/SceneTypes'
+import { Frame, Layer, SceneObject } from '../domain/SceneTypes'
 
 export interface NativeEngineModule {
   getVersion(): string

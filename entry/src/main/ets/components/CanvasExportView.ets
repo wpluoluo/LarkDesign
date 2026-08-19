@@ -6,7 +6,7 @@
  * 自动从 FusionDocumentStore 读取当前 Frame 并缩放适配。
  */
 import { Canvas2DRenderer } from '../utils/Canvas2DRenderer'
-import { Frame, SceneObject } from '../types/SceneTypes'
+import { Frame, SceneObject } from '../domain/SceneTypes'
 import { FusionDocumentStore } from '../stores/FusionDocumentStore'
 
 @Component
