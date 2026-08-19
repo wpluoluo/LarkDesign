@@ -4,9 +4,9 @@
  * 对应原型 src/components/ColorPickerPanel.vue
  * 包含：色相条 + SV 方块 + HEX + RGB 输入 + 色板
  */
-import { ColorToken } from '../tokens/DesignTokens'
-import { RadiusToken, FontWeightConstant } from '../tokens/DesignTokens'
-import { IconCharToken as Icon } from '../tokens/IconToken'
+import { ColorToken } from '../../../tokens/DesignTokens'
+import { RadiusToken, FontWeightConstant } from '../../../tokens/DesignTokens'
+import { IconCharToken as Icon } from '../../../tokens/IconToken'
 import { hexToRgb, rgbToHex, rgbToHsl, hslToRgb, isValidHex, CmykColor } from '../utils/colorUtils'
 import { ColorChannelInput } from './ColorChannelInput'
 

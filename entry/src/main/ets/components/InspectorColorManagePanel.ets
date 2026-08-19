@@ -7,7 +7,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { FontWeightConstant } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { ColorPickerPanel } from './ColorPickerPanel'
+import { ColorPickerPanel } from '../features/color/components/ColorPickerPanel'
 
 @Component
 export struct InspectorColorManagePanel {

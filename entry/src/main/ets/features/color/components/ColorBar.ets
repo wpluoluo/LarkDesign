@@ -4,10 +4,10 @@
  * 对应原型 src/components/ColorBar.vue
  * 显示最近使用/常用色彩 + 当前选中色 + 弹出颜色选择器
  */
-import { ColorToken } from '../tokens/DesignTokens'
-import { RadiusToken, FontWeightConstant, FontSizeToken, ShadowToken, SpacingToken } from '../tokens/DesignTokens'
-import { IconCharToken as Icon } from '../tokens/IconToken'
-import { ColorStore } from '../features/color/state/ColorStore'
+import { ColorToken } from '../../../tokens/DesignTokens'
+import { RadiusToken, FontWeightConstant, FontSizeToken, ShadowToken, SpacingToken } from '../../../tokens/DesignTokens'
+import { IconCharToken as Icon } from '../../../tokens/IconToken'
+import { ColorStore } from '../state/ColorStore'
 import { ColorPickerPanel } from './ColorPickerPanel'
 
 @Component

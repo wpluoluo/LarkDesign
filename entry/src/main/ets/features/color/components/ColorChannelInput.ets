@@ -4,8 +4,8 @@
  * 对应原型 src/components/ColorChannelInput.vue
  * 单通道数值输入（R/G/B/H/S/L/C/M/Y/K），带标签、后缀、min/max 约束
  */
-import { ColorToken } from '../tokens/DesignTokens'
-import { FontWeightConstant } from '../tokens/DesignTokens'
+import { ColorToken } from '../../../tokens/DesignTokens'
+import { FontWeightConstant } from '../../../tokens/DesignTokens'
 
 @Component
 export struct ColorChannelInput {

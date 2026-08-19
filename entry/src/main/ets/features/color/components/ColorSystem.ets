@@ -4,9 +4,9 @@
  * 对应原型 src/components/ColorSystem.vue
  * 显示文档色彩系统：色板、渐变色、色彩样式
  */
-import { ColorToken } from '../tokens/DesignTokens'
-import { FontWeightConstant, FontSizeToken, SpacingToken, RadiusToken } from '../tokens/DesignTokens'
-import { IconCharToken as Icon } from '../tokens/IconToken'
+import { ColorToken } from '../../../tokens/DesignTokens'
+import { FontWeightConstant, FontSizeToken, SpacingToken, RadiusToken } from '../../../tokens/DesignTokens'
+import { IconCharToken as Icon } from '../../../tokens/IconToken'
 
 @Component
 export struct ColorSystem {

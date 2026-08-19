@@ -4,8 +4,8 @@
  * 对应原型 src/components/ColorPickerPopover.vue
  * 包含：ColorPickerPanel + 透明度滑块 + 取消按钮
  */
-import { ColorToken } from '../tokens/DesignTokens'
-import { RadiusToken, FontWeightConstant, ShadowToken, ZIndexToken } from '../tokens/DesignTokens'
+import { ColorToken } from '../../../tokens/DesignTokens'
+import { RadiusToken, FontWeightConstant, ShadowToken, ZIndexToken } from '../../../tokens/DesignTokens'
 import { ColorPickerPanel } from './ColorPickerPanel'
 
 @Component

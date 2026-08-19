@@ -17,6 +17,12 @@ const required = [
 ]
 
 const errors = []
+const legacyFlatDirectories = [
+  'entry/src/main/ets/components/',
+  'entry/src/main/ets/data/',
+  'entry/src/main/ets/tokens/',
+  'entry/src/main/ets/utils/',
+]
 for (const file of required) {
   if (!existsSync(join(root, file))) errors.push(`缺少正式项目文件: ${file}`)
 }
@@ -51,6 +57,21 @@ try {
   execFileSync('git', ['diff', '--check'], { cwd: root, stdio: 'pipe' })
 } catch (error) {
   errors.push(`git diff --check 失败: ${error.stdout?.toString() ?? error.message}`)
+}
+
+try {
+  const addedFiles = execFileSync(
+    'git',
+    ['diff-tree', '--no-commit-id', '--name-only', '-r', '--diff-filter=A', 'HEAD'],
+    { cwd: root, encoding: 'utf8' },
+  )
+  for (const file of addedFiles.split(/\r?\n/)) {
+    if (legacyFlatDirectories.some((directory) => file.startsWith(directory))) {
+      errors.push(`禁止向平铺目录新增正式文件: ${file}`)
+    }
+  }
+} catch (error) {
+  errors.push(`无法检查平铺目录新增文件: ${error.message}`)
 }
 
 if (releaseMode) {

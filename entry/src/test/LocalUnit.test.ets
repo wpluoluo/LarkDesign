@@ -26,6 +26,7 @@ import { LayerStore } from '../main/ets/domain/LayerStore'
 import { LayerBlendStore, getBlendModeLabel } from '../main/ets/domain/LayerBlendStore'
 import { ToolStore } from '../main/ets/features/canvas/state/ToolStore'
 import { ColorStore } from '../main/ets/features/color/state/ColorStore'
+import { hexToCmyk, hexToHsl, hexToRgb, hslToHex, isValidHex, normalizeHex, rgbToHex } from '../main/ets/features/color/utils/colorUtils'
 import { ThemeStore } from '../main/ets/features/workspace/state/ThemeStore'
 import { ToastStore } from '../main/ets/features/common/state/ToastStore'
 import { BYOKStore } from '../main/ets/features/ai/state/BYOKStore'
@@ -217,6 +218,23 @@ export default function localUnitTest() {
 
       expect(toasts.toasts.length).assertEqual(0)
       expect(byok.config.provider).assertEqual('deepseek')
+    })
+  })
+
+  describe('ColorFeatureSliceTest', () => {
+    it('colorFeatureUtilityEntryConvertsAndNormalizesColors', 0, () => {
+      const rgb = hexToRgb('#3ac487')
+      const cmyk = hexToCmyk('#000000')
+      const hsl = hexToHsl('#ff0000')
+
+      expect(rgb?.r).assertEqual(58)
+      expect(rgb?.g).assertEqual(196)
+      expect(rgb?.b).assertEqual(135)
+      expect(rgbToHex(300, 0.2, -3)).assertEqual('#ff0000')
+      expect(cmyk.k).assertEqual(100)
+      expect(hslToHex(hsl.h, hsl.s, hsl.l)).assertEqual('#ff0000')
+      expect(isValidHex('#3AC487')).assertTrue()
+      expect(normalizeHex('#3ac487')).assertEqual('#3AC487')
     })
   })
 }
