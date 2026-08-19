@@ -5,17 +5,17 @@
  * 首屏根据状态切换：启动屏 / 工作区
  * 集成全局键盘快捷键系统
  */
-import { ThemeStore } from '../../stores/ThemeStore'
-import { DocumentStore } from '../../stores/DocumentStore'
-import { FusionDocumentStore } from '../../stores/FusionDocumentStore'
-import { ToolStore } from '../../stores/ToolStore'
-import { ColorStore } from '../../stores/ColorStore'
-import { ToastStore } from '../../stores/ToastStore'
-import { LayerStore } from '../../stores/LayerStore'
+import { ThemeStore } from '../../features/workspace/state/ThemeStore'
+import { DocumentStore } from '../../domain/DocumentStore'
+import { FusionDocumentStore } from '../../domain/FusionDocumentStore'
+import { ToolStore } from '../../features/canvas/state/ToolStore'
+import { ColorStore } from '../../features/color/state/ColorStore'
+import { ToastStore } from '../../features/common/state/ToastStore'
+import { LayerStore } from '../../domain/LayerStore'
 import { KeyboardShortcuts } from '../../utils/KeyboardShortcuts'
 import { SplashScreen } from '../../components/SplashScreen'
 import { WorkspaceLayout } from '../../components/WorkspaceLayout'
-import { BYOKStore } from '../../stores/BYOKStore'
+import { BYOKStore } from '../../features/ai/state/BYOKStore'
 
 @Entry
 @Component
@@ -24,7 +24,7 @@ struct Index {
   private shortcuts: KeyboardShortcuts = KeyboardShortcuts.getInstance()
 
   aboutToAppear(): void {
-    // 初始化所有 stores
+    // 初始化所有状态入口
     ThemeStore.getInstance().init()
     DocumentStore.getInstance().init()
     FusionDocumentStore.getInstance().init()

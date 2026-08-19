@@ -7,7 +7,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { RadiusToken, FontWeightConstant, FontSizeToken, ShadowToken, SpacingToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { ColorStore } from '../stores/ColorStore'
+import { ColorStore } from '../features/color/state/ColorStore'
 import { ColorPickerPanel } from './ColorPickerPanel'
 
 @Component

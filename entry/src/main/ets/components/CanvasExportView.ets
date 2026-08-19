@@ -7,7 +7,7 @@
  */
 import { Canvas2DRenderer } from '../utils/Canvas2DRenderer'
 import { Frame, SceneObject } from '../domain/SceneTypes'
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 
 @Component
 export struct CanvasExportView {

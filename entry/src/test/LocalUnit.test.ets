@@ -19,6 +19,16 @@ import { HdsDocument } from '../main/ets/domain/SceneTypes'
 import { createScene, createShapeObject } from '../main/ets/domain/FusionFactory'
 import { addFrame, addLayer, addObjectToLayer, getFramesBoundingBox } from '../main/ets/domain/FusionOps'
 import { deserialize, serialize } from '../main/ets/domain/FusionSerializer'
+import { FusionDocumentStore } from '../main/ets/domain/FusionDocumentStore'
+import { FusionDocumentStoreInfo } from '../main/ets/domain/FusionDocumentStoreInfo'
+import { DocumentStore } from '../main/ets/domain/DocumentStore'
+import { LayerStore } from '../main/ets/domain/LayerStore'
+import { LayerBlendStore, getBlendModeLabel } from '../main/ets/domain/LayerBlendStore'
+import { ToolStore } from '../main/ets/features/canvas/state/ToolStore'
+import { ColorStore } from '../main/ets/features/color/state/ColorStore'
+import { ThemeStore } from '../main/ets/features/workspace/state/ThemeStore'
+import { ToastStore } from '../main/ets/features/common/state/ToastStore'
+import { BYOKStore } from '../main/ets/features/ai/state/BYOKStore'
 
 function asciiBytes(text: string): number[] {
   const result: number[] = []
@@ -165,6 +175,48 @@ export default function localUnitTest() {
       expect(second.y).assertEqual(first.y)
       expect(bounds?.minX).assertEqual(10)
       expect(bounds?.maxX).assertEqual(second.x + second.width)
+    })
+  })
+
+  describe('StoreVerticalSliceTest', () => {
+    it('featureStateEntriesExposeAndMutateMemoryState', 0, () => {
+      const tools = ToolStore.getInstance()
+      tools.selectTool('shape', '矩形')
+      expect(tools.activeToolName).assertEqual('矩形')
+
+      const colors = ColorStore.getInstance()
+      colors.addFavorite('#aabbcc')
+      expect(colors.favoriteColors.includes('#AABBCC')).assertTrue()
+
+      const theme = ThemeStore.getInstance()
+      expect(theme.currentTheme.id).assertEqual(theme.currentThemeId)
+    })
+
+    it('domainStoreEntriesExposeTheDocumentFacade', 0, () => {
+      const fusion = FusionDocumentStore.getInstance()
+      const document = DocumentStore.getInstance()
+      const info: FusionDocumentStoreInfo = fusion.getSceneInfo()
+
+      expect(document.docName).assertEqual(fusion.getScene().name)
+      expect(info.layerCount >= 0).assertTrue()
+      expect(info.objectCount >= 0).assertTrue()
+    })
+
+    it('domainLayerEntriesExposeSelectionAndBlendOperations', 0, () => {
+      const layers = LayerStore.getInstance()
+      const blends = LayerBlendStore.getInstance()
+
+      expect(layers.getSelectedLayerId()).assertEqual('')
+      expect(blends !== undefined).assertTrue()
+      expect(getBlendModeLabel('multiply')).assertEqual('正片叠底')
+    })
+
+    it('commonAndAiStateEntriesConstructWithoutInitialization', 0, () => {
+      const toasts = ToastStore.getInstance()
+      const byok = BYOKStore.getInstance()
+
+      expect(toasts.toasts.length).assertEqual(0)
+      expect(byok.config.provider).assertEqual('deepseek')
     })
   })
 }

@@ -10,7 +10,7 @@ import { LayoutToken, FontSizeToken, SpacingToken, RadiusToken, FontWeightConsta
 import { IconCharToken as Icon } from '../tokens/IconToken'
 import { Minimap } from './Minimap'
 import { FrameView } from './FrameView'
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 import { SceneObject, Frame, Layer, Transform, Rect } from '../domain/SceneTypes'
 import { genId, createShapeObject, createTextObject } from '../domain/FusionFactory'
 import { InfiniteCanvas, ViewportCallback } from './InfiniteCanvas'
@@ -18,7 +18,7 @@ import { CanvasRenderer, ObjectWithLayer } from './CanvasRenderer'
 import { CanvasInteraction, InteractionCallback, HandlePosition, ResizeResult } from './CanvasInteraction'
 import { ContextMenu } from './ContextMenu'
 import { ActionDispatcher } from '../utils/ActionDispatcher'
-import { ColorStore } from '../stores/ColorStore'
+import { ColorStore } from '../features/color/state/ColorStore'
 
 class ViewportCB implements ViewportCallback {
   private s: CanvasStage

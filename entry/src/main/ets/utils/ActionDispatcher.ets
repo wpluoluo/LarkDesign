@@ -1,4 +1,4 @@
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 import { Exporter, ExportFormat } from './Exporter'
 import { SceneObject } from '../domain/SceneTypes'
 import { addLayer } from '../domain/FusionOps'

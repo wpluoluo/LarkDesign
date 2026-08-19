@@ -7,7 +7,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { LayoutToken, FontWeightConstant } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 import { ColorPickerPopover } from './ColorPickerPopover'
 import { InspectorDesignTab } from './InspectorDesignTab'
 import { InspectorExportTab } from './InspectorExportTab'

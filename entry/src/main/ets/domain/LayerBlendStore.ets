@@ -1,10 +1,11 @@
 /**
  * LayerBlendStore - 混合模式状态管理
  *
- * 对应原型 src/composables/layerBlendStore.ts
+ * 提供图层混合模式状态与选项。
  * 提供混合模式选项列表、标签查询和图层级混合模式快捷切换。
  */
 import { FusionDocumentStore } from './FusionDocumentStore'
+import { BlendMode } from './SceneTypes'
 
 export interface BlendModeOption {
   value: string
@@ -52,7 +53,7 @@ export class LayerBlendStore {
     return LayerBlendStore.instance
   }
 
-  setLayerBlendMode(layerId: string, blendMode: string): void {
+  setLayerBlendMode(layerId: string, blendMode: BlendMode): void {
     const layers = this.fusionStore.getCurrentLayers()
     for (let i = 0; i < layers.length; i++) {
       if (layers[i].id === layerId) {

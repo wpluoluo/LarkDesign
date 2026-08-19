@@ -6,7 +6,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { FontWeightConstant } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { BYOKStore } from '../stores/BYOKStore'
+import { BYOKStore } from '../features/ai/state/BYOKStore'
 
 /** AI 对话消息 */
 interface AiMessage {

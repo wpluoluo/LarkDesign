@@ -10,10 +10,10 @@
  *  Ctrl+视图：0/1/=/-/R
  *  其他：Delete/Backspace/Esc/Space/方向键
  */
-import { ToolStore, ToolId } from '../stores/ToolStore'
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
-import { DocumentStore } from '../stores/DocumentStore'
-import { ToastStore } from '../stores/ToastStore'
+import { ToolStore, ToolId } from '../features/canvas/state/ToolStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
+import { DocumentStore } from '../domain/DocumentStore'
+import { ToastStore } from '../features/common/state/ToastStore'
 import { IconCharToken as Icon } from '../tokens/IconToken'
 
 export class KeyboardShortcuts {

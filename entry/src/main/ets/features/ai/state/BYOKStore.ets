@@ -1,6 +1,6 @@
 import http from '@ohos.net.http'
 import preferences from '@ohos.data.preferences'
-import { AppContext } from '../platform/AppContext'
+import { AppContext } from '../../../platform/AppContext'
 
 export interface ByokConfig {
   provider: string

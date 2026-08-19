@@ -1,7 +1,7 @@
 /**
  * ToastStore - Toast 提示管理
  *
- * 对应原型 src/stores/toast.ts
+ * 管理全局单行提示。
  * 固定一行显示：新消息替换旧消息，不追加弹出。
  */
 export type ToastType = 'success' | 'info' | 'warning'

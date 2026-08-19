@@ -14,7 +14,7 @@
 
 **Files:**
 - Modify: `entry/src/main/ets/platform/FilePersistence.ets`
-- Modify: `entry/src/main/ets/stores/FusionDocumentStore.ets`
+- Modify: `entry/src/main/ets/domain/FusionDocumentStore.ets`
 - Create: `entry/src/test` 对应持久化用例（LocalUnit）
 - Modify: `docs/standards/engineering-gates.md`（完成后更新基线）
 
@@ -61,10 +61,12 @@
 **Files:**
 - Move: `FusionDocumentStore`、`LayerStore`、`LayerBlendStore`（文档状态）→ `domain/`
 - Move: `ToolStore`、`ColorStore`、`ThemeStore`、`ToastStore`、`BYOKStore`（UI/特性状态）→ `features/*`
-- Delete: `entry/src/main/ets/stores/`（全部迁空后）
+- Delete: 旧平铺状态目录（全部迁空后）
 
-- [ ] 单例与初始化顺序保持行为不变，`app/pages/Index.ets` 是唯一组装点。
-- [ ] 每迁移一批 store 编译+运行一次设备冒烟，通过后删除对应旧文件。
+- [x] 单例与初始化顺序保持行为不变，`app/pages/Index.ets` 仍是唯一组装点。（2026-08-19：初始化顺序保持 `Theme → Document → FusionDocument → BYOK → Tool → Color → Toast → Layer` 不变。）
+- [x] 已删除旧平铺状态目录，不保留兼容 re-export 或旧路径；`FusionDocumentStore`、`FusionDocumentStoreInfo`、`DocumentStore`、`LayerStore`、`LayerBlendStore` 迁入 `domain/`，`ToolStore`、`ColorStore`、`ThemeStore`、`ToastStore`、`BYOKStore` 分别迁入对应特性 `state/` 目录。（2026-08-19）
+- [x] 迁移测试证据：先在 `LocalUnit.test.ets` 由未来 `domain/` 与 `features/*/state/` 路径导入并运行 `pnpm test:harmony`，确认因十个目标模块不存在而在 `UnitTestArkTS` 失败；移动后同一命令 `BUILD SUCCESSFUL`，覆盖工具/颜色主题状态、领域文档与图层入口、Toast/BYOK 无初始化入口。最终自动化验证通过：`pnpm test`（18/18）、`pnpm test:harmony`、`pnpm verify:formal`、`pnpm verify:release`、`git diff --check`；随后 Hvigor clean 后的 `pnpm build:harmony` 重新编译 ArkTS 并成功打包 HAP。（2026-08-19）
+- [ ] 真机/模拟器冒烟：本机无可用设备或模拟器，未执行设备流程，不能作为迁移完成证据。（阻断：`hdc list targets` 无目标。）
 
 ### Task 6: 工具与组件归组（utils / components / data / tokens → features）
 

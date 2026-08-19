@@ -35,9 +35,9 @@
 - [tokens/DesignTokens.ets](../../entry/src/main/ets/tokens/DesignTokens.ets) - Token 常量类
 - [pages/Index.ets](../../entry/src/main/ets/pages/Index.ets) - 主页面入口（替换 Hello World）
 
-#### Stores
-- [stores/ThemeStore.ets](../../entry/src/main/ets/stores/ThemeStore.ets) - 主题管理
-- [stores/DocumentStore.ets](../../entry/src/main/ets/stores/DocumentStore.ets) - 文档状态
+#### 状态入口（当前路径）
+- [features/workspace/state/ThemeStore.ets](../../entry/src/main/ets/features/workspace/state/ThemeStore.ets) - 主题管理
+- [domain/DocumentStore.ets](../../entry/src/main/ets/domain/DocumentStore.ets) - 文档状态
 
 #### Components
 - [components/SplashScreen.ets](../../entry/src/main/ets/components/SplashScreen.ets) - 启动屏（4 种模式选择）
@@ -183,5 +183,4 @@ UI (ArkTS) → Feature (ArkTS) → Domain (纯 TS/ArkTS) → Port (NAPI/系统 A
 - 视觉对比：原型截图 vs 鸿蒙端渲染
 - 交互对比：按 [../reference/interaction-spec.md](../reference/interaction-spec.md) 逐项验证
 - 跨端对比：鸿蒙 / Android / iOS 三端一致性
-
 

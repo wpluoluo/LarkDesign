@@ -1,20 +1,20 @@
 ﻿/**
  * FusionDocumentStore - Fusion 文档状态管理（鸿蒙端）
  *
- * 对应原型 src/stores/fusionDocument.ts
+ * 管理鸿蒙端的 Fusion 文档状态。
  * 使用 AppStorage 实现全局响应式，配合 @StorageLink 在组件中订阅。
  */
-import { HdsDocument, Scene, Layer, Frame, SceneObject, Transform, LayerEffect, BlendMode } from '../domain/SceneTypes'
-import { createScene, createLayer, genId } from '../domain/FusionFactory'
+import { HdsDocument, Scene, Layer, Frame, SceneObject, Transform, LayerEffect, BlendMode } from './SceneTypes'
+import { createScene, createLayer, genId } from './FusionFactory'
 import {
   getCurrentFrame, getCurrentLayers, getCurrentPage,
   addFrame, removeFrame, duplicateFrame, findFrameById, updateFrame,
   addLayer, findLayerById, removeLayer,
   findObjectInDoc, addObjectToLayer, updateObjectTransform,
   listAllObjects, getFramesBoundingBox, fitViewportToFrames,
-} from '../domain/FusionOps'
+} from './FusionOps'
 import { FusionDocumentStoreInfo } from './FusionDocumentStoreInfo'
-import { serialize, deserialize, deepClone, estimateSize } from '../domain/FusionSerializer'
+import { serialize, deserialize, deepClone, estimateSize } from './FusionSerializer'
 import { FilePersistence } from '../platform/FilePersistence'
 import { PersistenceErrorCode } from '../platform/PersistenceTypes'
 

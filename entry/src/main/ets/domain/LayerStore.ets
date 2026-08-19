@@ -1,11 +1,11 @@
 /**
  * LayerStore - 图层状态管理
  *
- * 对应原型 src/stores/layer.ts
+ * 管理当前图层与元素选择状态。
  */
-import { SceneObject, Layer } from '../domain/SceneTypes'
+import { SceneObject, Layer } from './SceneTypes'
 import { FusionDocumentStore } from './FusionDocumentStore'
-import { listAllObjects, findObjectInDoc, FindResult } from '../domain/FusionOps'
+import { listAllObjects, findObjectInDoc, FindResult } from './FusionOps'
 
 export class LayerStore {
   private static instance: LayerStore

@@ -7,7 +7,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { RadiusToken, FontWeightConstant, FontSizeToken, ShadowToken, SpacingToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { ThemeStore, ThemeId, THEME_LIST, ThemeMeta } from '../stores/ThemeStore'
+import { ThemeStore, ThemeId, THEME_LIST, ThemeMeta } from '../features/workspace/state/ThemeStore'
 
 export interface ThemeSwatch {
   colors: string[]

@@ -7,7 +7,7 @@
 import { ColorToken, FontWeightConstant } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
 import { CanvasExportView, CanvasExportSettings } from './CanvasExportView'
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 import { Exporter, ExportFormat } from '../utils/Exporter'
 import { Frame } from '../domain/SceneTypes'
 

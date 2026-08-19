@@ -1,4 +1,4 @@
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 import { SceneObject } from '../domain/SceneTypes'
 import { findLayerById, findObjectInDoc, addMaskToLayer } from '../domain/FusionOps'
 import { Mask } from '../domain/SceneTypes'

@@ -7,7 +7,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { FontWeightConstant, FontSizeToken, SpacingToken, RadiusToken, ShadowToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { BYOKStore } from '../stores/BYOKStore'
+import { BYOKStore } from '../features/ai/state/BYOKStore'
 
 @Component
 export struct ByokConfigModal {

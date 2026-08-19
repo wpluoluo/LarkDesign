@@ -7,7 +7,7 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { RadiusToken, FontWeightConstant, FontSizeToken, SpacingToken } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 
 @Component
 export struct DocumentToolbar {

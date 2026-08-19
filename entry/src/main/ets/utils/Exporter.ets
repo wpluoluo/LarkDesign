@@ -1,4 +1,4 @@
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 import { serialize, estimateSize } from '../domain/FusionSerializer'
 import { Canvas2DRenderer } from './Canvas2DRenderer'
 import { Frame, SceneObject, Layer, HdsDocument } from '../domain/SceneTypes'

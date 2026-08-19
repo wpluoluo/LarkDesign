@@ -1,7 +1,7 @@
 import { SceneObject, Frame, ShapeKind } from '../domain/SceneTypes'
 import { createShapeObject, createTextObject } from '../domain/FusionFactory'
 import { CanvasInteraction } from '../components/CanvasInteraction'
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 
 export type DrawMode = 'none' | 'shape' | 'text'
 

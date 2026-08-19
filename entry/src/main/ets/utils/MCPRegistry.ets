@@ -4,7 +4,7 @@
  * 对应原型 src/ai/mcp.ts
  * 轻量级 MCP 风格工具注册中心，让 AI Agent 通过工具调用操作 Fusion DOM。
  */
-import { FusionDocumentStore } from '../stores/FusionDocumentStore'
+import { FusionDocumentStore } from '../domain/FusionDocumentStore'
 import { SceneObject, Transform, BlendMode, NodeType, HdsDocument, Layer } from '../domain/SceneTypes'
 import { findObjectInDoc, addLayer } from '../domain/FusionOps'
 

@@ -7,8 +7,8 @@
 import { ColorToken } from '../tokens/DesignTokens'
 import { FontSizeToken, FontWeightConstant } from '../tokens/DesignTokens'
 import { IconCharToken as Icon } from '../tokens/IconToken'
-import { FusionDocumentStore, HistoryEntry } from '../stores/FusionDocumentStore'
-import { ToastStore } from '../stores/ToastStore'
+import { FusionDocumentStore, HistoryEntry } from '../domain/FusionDocumentStore'
+import { ToastStore } from '../features/common/state/ToastStore'
 
 @Component
 export struct HistoryPanel {
